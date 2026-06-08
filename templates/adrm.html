@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADRM Dashboard | Palakkad Division | Southern Railway</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@600;700&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+ 
+    <style>
+        :root {
+            --railway-blue: #003366;
+            --railway-blue-dark: #002244;
+            --gold: #d4a017;
+            --navbar-height: 64px;
+        }
+ 
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background: #eef2f7;
+            padding-top: var(--navbar-height);
+            padding-bottom: 56px;
+            min-height: 100vh;
+        }
+ 
+        /* ── NAVBAR with logo and logout ── */
+        .top-navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--navbar-height);
+            background: var(--railway-blue);
+            border-bottom: 3px solid var(--gold);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            gap: 1rem;
+            z-index: 1050;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        /* Logo image styling */
+        .logo-img {
+            height: 40px;
+            width: auto;
+            display: block;
+        }
+        
+        .emblem {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand-title {
+            font-family: 'Noto Serif', serif;
+            font-size: 1rem; font-weight: 700; color: #fff;
+            line-height: 1.2;
+        }
+        .brand-sub {
+            font-size: 0.68rem; color: var(--gold);
+            text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .navbar-divider {
+            width: 1px; height: 34px;
+            background: rgba(255,255,255,0.2); margin: 0 1rem;
+        }
+        .portal-label {
+            font-size: 0.78rem; color: rgba(255,255,255,0.65);
+            letter-spacing: 0.04em; text-transform: uppercase;
+        }
+        .nav-controls {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.08);
+            padding: 0.2rem 0.9rem 0.2rem 0.7rem;
+            border-radius: 40px;
+            border-left: 2px solid var(--gold);
+        }
+        .user-badge i {
+            font-size: 0.9rem;
+            color: var(--gold);
+        }
+        .user-badge span {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #eef2ff;
+            letter-spacing: 0.02em;
+        }
+        .role-adrm {
+            background: var(--gold);
+            color: var(--railway-blue-dark);
+            font-weight: 700;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 6px;
+        }
+        .logout-nav-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 30px;
+            padding: 5px 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            letter-spacing: 0.3px;
+        }
+        .logout-nav-btn i {
+            font-size: 0.8rem;
+            color: var(--gold);
+        }
+        .logout-nav-btn:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: var(--gold);
+            color: white;
+            transform: translateY(-1px);
+        }
+        .logout-nav-btn:active {
+            transform: translateY(1px);
+        }
+ 
+        /* ── PAGE WRAPPER ── */
+        .page-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.6rem 1.2rem 2rem;
+        }
+ 
+        /* ── BREADCRUMB ── */
+        .ir-breadcrumb {
+            background: #fff;
+            border: 1px solid #d6dfee;
+            border-radius: 6px;
+            padding: 9px 15px;
+            margin-bottom: 1.4rem;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .ir-breadcrumb a {
+            color: var(--railway-blue); text-decoration: none; font-weight: 500;
+        }
+        .ir-breadcrumb a:hover { text-decoration: underline; }
+        .ir-breadcrumb .sep { color: #aaa; }
+        .ir-breadcrumb .crumb-current { color: #555; }
+ 
+        /* ── PAGE HEADING ── */
+        .page-heading {
+            font-family: 'Noto Serif', serif;
+            font-size: 1.45rem; font-weight: 700;
+            color: var(--railway-blue);
+            margin-bottom: 0.25rem;
+        }
+        .page-sub {
+            font-size: 0.8rem; color: #6b7a9c;
+            margin-bottom: 1.6rem;
+        }
+ 
+        /* ── TABLE CARD ── */
+        .table-card {
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #d6dfee;
+            box-shadow: 0 2px 8px rgba(0,51,102,0.07);
+            overflow: hidden;
+        }
+        .table-card-header {
+            background: var(--railway-blue);
+            padding: 0.9rem 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .table-card-header-title {
+            font-family: 'Noto Serif', serif;
+            font-size: 0.95rem; font-weight: 600; color: #fff;
+        }
+        .table-card-header i { color: var(--gold); }
+ 
+        /* ── TABLE ── */
+        .kpi-table { width: 100%; border-collapse: collapse; }
+        .kpi-table thead tr {
+            background: #f0f4fa;
+            border-bottom: 2px solid #c5d1e8;
+        }
+        .kpi-table thead th {
+            padding: 10px 14px;
+            font-size: 0.73rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--railway-blue);
+            white-space: nowrap;
+        }
+        .kpi-table tbody tr {
+            border-bottom: 1px solid #edf0f9;
+            transition: background 0.12s;
+        }
+        .kpi-table tbody tr:hover { background: #f5f8ff; }
+        .kpi-table tbody td {
+            padding: 11px 14px;
+            font-size: 0.84rem;
+            color: #2d3748;
+            vertical-align: middle;
+        }
+        .kpi-name { font-weight: 500; color: #003f80; }
+        .perf-val {
+            font-family: 'Noto Serif', serif;
+            font-weight: 600; font-size: 0.9rem;
+        }
+ 
+        /* ── STATUS BADGES ── */
+        .badge-status {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 9px;
+            border-radius: 4px;
+            font-size: 0.71rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .badge-status::before {
+            content: ''; width: 6px; height: 6px;
+            border-radius: 50%; flex-shrink: 0;
+        }
+        .status-SUBMITTED  { background:#fffbea; color:#975a16; border:1px solid #fbd38d; }
+        .status-SUBMITTED::before  { background:#d69e2e; }
+        .status-APPROVED   { background:#f0fff4; color:#276749; border:1px solid #c3e6cb; }
+        .status-APPROVED::before   { background:#38a169; }
+        .status-RETURNED   { background:#fff5f5; color:#9b2c2c; border:1px solid #fed7d7; }
+        .status-RETURNED::before   { background:#e53e3e; }
+        .status-FORWARDED_TO_DRM  { background:#ebf8ff; color:#1a5f8a; border:1px solid #bee3f8; }
+        .status-FORWARDED_TO_DRM::before  { background:#3182ce; }
+        .status-FROZEN     { background:#f7fafc; color:#4a5568; border:1px solid #cbd5e0; }
+        .status-FROZEN::before     { background:#718096; }
+        .status-PENDING    { background:#fffbea; color:#975a16; border:1px solid #fbd38d; }
+        .status-PENDING::before    { background:#d69e2e; }
+ 
+        /* ── FORWARD BUTTON ── */
+        .btn-forward {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--railway-blue); color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 6px 13px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+        }
+        .btn-forward:hover {
+            background: #004080; color: #fff;
+            box-shadow: 0 3px 10px rgba(0,51,102,0.28);
+            transform: translateY(-1px);
+        }
+        .btn-forward:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .btn-forward i { font-size: 0.74rem; }
+ 
+        /* ── FOOTER ── */
+        .ir-footer {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--railway-blue-dark);
+            border-top: 2px solid var(--gold);
+            padding: 9px 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+        }
+        .footer-left {
+            font-size: 0.73rem; color: rgba(255,255,255,0.7);
+        }
+        .footer-left strong { color: var(--gold); }
+        .footer-right {
+            font-size: 0.68rem; color: rgba(255,255,255,0.38);
+        }
+ 
+        /* responsiveness */
+        @media (max-width: 780px) {
+            .top-navbar {
+                padding: 0 1rem;
+                gap: 0.7rem;
+                flex-wrap: wrap;
+                height: auto;
+                min-height: var(--navbar-height);
+            }
+            .nav-controls {
+                margin-left: 0;
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 4px;
+            }
+            .user-badge {
+                padding: 0.2rem 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+ 
+<!-- NAVBAR with LOGOUT BUTTON and Railway Logo (ADRM Dashboard) -->
+<nav class="top-navbar">
+    <!-- Railway Logo Image -->
+    <div class="emblem">
+        <img src="{{ url_for('static', filename='images/images.png') }}" 
+             alt="Southern Railway Emblem" 
+             class="logo-img"
+             onerror="this.style.display='none'; this.parentElement.innerHTML='<svg class=\'ir-wheel\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'><circle cx=\'50\' cy=\'50\' r=\'46\' fill=\'none\' stroke=\'#d4a017\' stroke-width=\'4\'/><circle cx=\'50\' cy=\'50\' r=\'9\' fill=\'#d4a017\'/><circle cx=\'50\' cy=\'50\' r=\'4\' fill=\'#003366\'/><line x1=\'50\' y1=\'50\' x2=\'50\' y2=\'13\' stroke=\'#d4a017\' stroke-width=\'2.5\'/><line x1=\'50\' y1=\'50\' x2=\'83\' y2=\'22\' stroke=\'#d4a017\' stroke-width=\'2.5\'/><line x1=\'50\' y1=\'50\' x2=\'87\' y2=\'50\' stroke=\'#d4a017\' stroke-width=\'2.5\'/><line x1=\'50\' y1=\'50\' x2=\'83\' y2=\'78\' stroke=\'#d4a017\' stroke-width=\'2.5\'/><line x1=\'50\' y1=\'50\' x2=\'50\' y2=\'87\' stroke=\'#d4a017\' stroke-width=\'2.5\'/><line x1=\'50\' y1=\'50\' x2=\'17\' y2=\'78\' stroke=\'#d4a017\' stroke-width=\'2.5\'/><line x1=\'50\' y1=\'50\' x2=\'13\' y2=\'50\' stroke=\'#d4a017\' stroke-width=\'2.5\'/><line x1=\'50\' y1=\'50\' x2=\'17\' y2=\'22\' stroke=\'#d4a017\' stroke-width=\'2.5\'/><circle cx=\'50\' cy=\'13\' r=\'3\' fill=\'#d4a017\'/><circle cx=\'83\' cy=\'22\' r=\'3\' fill=\'#d4a017\'/><circle cx=\'87\' cy=\'50\' r=\'3\' fill=\'#d4a017\'/><circle cx=\'83\' cy=\'78\' r=\'3\' fill=\'#d4a017\'/><circle cx=\'50\' cy=\'87\' r=\'3\' fill=\'#d4a017\'/><circle cx=\'17\' cy=\'78\' r=\'3\' fill=\'#d4a017\'/><circle cx=\'13\' cy=\'50\' r=\'3\' fill=\'#d4a017\'/><circle cx=\'17\' cy=\'22\' r=\'3\' fill=\'#d4a017\'/></svg>'">
+    </div>
+    
+    <div>
+        <div class="brand-title">Indian Railways</div>
+        <div class="brand-sub">Division Performance Monitoring System</div>
+    </div>
+    
+    <div class="navbar-divider"></div>
+    
+    <span class="portal-label">Palakkad Division &bull; Southern Railway</span>
+    
+    <div class="nav-controls">
+        <div class="user-badge">
+            <i class="fa fa-user-shield"></i>
+            <span>Officer <span class="role-adrm">ADRM</span></span>
+        </div>
+        <a href="/logout" class="logout-nav-btn" id="adrmLogoutBtn">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+</nav>
+ 
+<!-- PAGE CONTENT -->
+<div class="page-wrapper">
+ 
+    <!-- Breadcrumb -->
+    <div class="ir-breadcrumb">
+        <i class="fa fa-home" style="color:var(--railway-blue);font-size:0.78rem;"></i>
+        <a href="#">Home</a>
+        <span class="sep">/</span>
+        <a href="#">ADRM Dashboard</a>
+        <span class="sep">/</span>
+        <span class="crumb-current">KPI Review</span>
+    </div>
+ 
+    <!-- Heading -->
+    <div class="page-heading">
+        <i class="fa fa-tachometer-alt" style="color:var(--gold);margin-right:8px;font-size:1.2rem;"></i>
+        ADRM Officer Dashboard
+    </div>
+    <div class="page-sub">Division Performance Monitoring &mdash; KPI Review &amp; Forwarding to DRM</div>
+ 
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-card-header">
+            <i class="fa fa-table"></i>
+            <span class="table-card-header-title">KPI Performance Register</span>
+        </div>
+ 
+        <div class="table-responsive">
+            <table class="kpi-table">
+                <thead>
+                    <tr>
+                        <th><i class="fa fa-tag me-1" style="opacity:0.55;"></i>KPI</th>
+                        <th><i class="fa fa-calendar me-1" style="opacity:0.55;"></i>Monthly</th>
+                        <th><i class="fa fa-chart-line me-1" style="opacity:0.55;"></i>Cumulative</th>
+                        <th><i class="fa fa-circle me-1" style="opacity:0.55;"></i>Status</th>
+                        <th><i class="fa fa-cogs me-1" style="opacity:0.55;"></i>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+ 
+                    {% for row in rows %}
+                    <tr data-id="{{ row.id }}" data-status="{{ row.status }}">
+                        <td class="kpi-name">{{ row.kpi_name }}</td>
+                        <td><span class="perf-val">{{ row.performance_month }}</span></td>
+                        <td><span class="perf-val">{{ row.cumulative_performance }}</span></td>
+                        <td class="status-cell">
+                            {% if row.status == 'FORWARDED_TO_DRM' %}
+                            <span class="badge-status status-FORWARDED_TO_DRM"><i class="fas fa-paper-plane"></i>FORWARDED_TO_DRM</span>
+                            {% else %}
+                            <span class="badge-status status-{{ row.status }}">{{ row.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="action-cell">
+                            {% if row.status != 'FORWARDED_TO_DRM' and row.status != 'FROZEN' %}
+                            <a href="/forward_to_drm/{{ row.id }}" class="btn-forward" data-id="{{ row.id }}" data-kpiname="{{ row.kpi_name }}">
+                                <i class="fa fa-paper-plane"></i> Forward to DRM
+                            </a>
+                            {% elif row.status == 'FORWARDED_TO_DRM' %}
+                            <button class="btn-forward" disabled style="background:#f59e0b;">
+                                <i class="fa fa-check-circle"></i> Forwarded to DRM
+                            </button>
+                            {% else %}
+                            <button class="btn-forward" disabled>
+                                <i class="fa fa-check-circle"></i> Already Processed
+                            </button>
+                            {% endif %}
+                         </td>
+                     </tr>
+                    {% endfor %}
+ 
+                </tbody>
+            </table>
+        </div>
+    </div>
+ 
+</div>
+ 
+<!-- FOOTER -->
+<footer class="ir-footer">
+    <div class="footer-left">
+        <strong>Palakkad Division</strong> &bull; Southern Railway &bull; Government of India
+    </div>
+    <div class="footer-right">Division Performance Monitoring System &bull; Internal Use Only</div>
+</footer>
+ 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function() {
+        // Logout confirmation for ADRM dashboard
+        const logoutBtn = document.getElementById('adrmLogoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function(event) {
+                const confirmLogout = confirm('Are you sure you want to logout from ADRM Dashboard?');
+                if (!confirmLogout) {
+                    event.preventDefault();
+                    return false;
+                }
+                return true;
+            });
+        }
+        
+        // Add confirmation for "Forward to DRM" action
+        const forwardBtns = document.querySelectorAll('.btn-forward');
+        forwardBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const kpiName = this.getAttribute('data-kpiname') || 
+                               (this.closest('tr')?.querySelector('.kpi-name')?.innerText || 'this KPI');
+                const confirmForward = confirm(`Forward "${kpiName}" to DRM?\n\nStatus will be updated to FORWARDED_TO_DRM and DRM will be able to review.`);
+                if (!confirmForward) {
+                    e.preventDefault();
+                }
+            });
+        });
+        
+        console.log('ADRM Dashboard ready — Logo integrated, Logout and forward confirmations active.');
+    })();
+</script>
+</body>
+</html>

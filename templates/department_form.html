@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8"/>
+ <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+ <title>Railway DPMS – KPI Entry</title>
+ <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+ <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+ <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Serif:wght@700&display=swap" rel="stylesheet"/>
+ <style>
+ :root {
+ --rly-blue: #003366;
+ --rly-mid: #004080;
+ --rly-light: #0055a5;
+ --rly-gold: #d4a017;
+ --rly-bg: #eef2f7;
+ --border: #cdd8e3;
+ }
+ 
+ body {
+ font-family: 'Noto Sans', sans-serif;
+ background: var(--rly-bg);
+ color: #1a2a3a;
+ min-height: 100vh;
+ display: flex;
+ flex-direction: column;
+ }
+ .kpi-table tbody tr {
+    border: 1px solid #d6dee8;
+}
+ 
+ /* ── NAVBAR ── */
+ .top-navbar {
+ background: var(--rly-blue);
+ border-bottom: 3px solid var(--rly-gold);
+ padding: .6rem 1.5rem;
+ display: flex;
+ align-items: center;
+ gap: 1rem;
+ box-shadow: 0 2px 8px rgba(0,0,0,.35);
+ position: sticky;
+ top: 0;
+ z-index: 1000;
+ flex-wrap: wrap;
+ }
+
+ /* Logo image styling */
+ .logo-img {
+ height: 45px;
+ width: auto;
+ display: block;
+ }
+
+ .emblem {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ flex-shrink: 0;
+ }
+
+ .brand-title {
+ font-family: 'Noto Serif', serif;
+ font-size: .92rem; font-weight: 700;
+ color: #fff; letter-spacing: .04em;
+ text-transform: uppercase; line-height: 1.2;
+ }
+ .brand-sub { font-size: .62rem; color: var(--rly-gold); letter-spacing: .1em; text-transform: uppercase; }
+ .nav-divider { width: 1px; height: 34px; background: rgba(255,255,255,.2); margin: 0 .5rem; }
+ .app-name { font-size: .78rem; font-weight: 600; color: #c8d8f0; letter-spacing: .04em; text-transform: uppercase; }
+ .app-sub { font-size: .65rem; color: rgba(255,255,255,.5); }
+
+ /* User info section */
+ .user-info {
+    margin-left: auto;
+    text-align: right;
+    color: white;
+    padding-right: 15px;
+ }
+
+.user-info .welcome{
+    font-size:14px;
+    font-weight:700;
+}
+
+.user-info .empid{
+    font-size:12px;
+    color:#d4a017;
+}
+
+/* Logout button */
+.logout-nav-btn {
+ background: rgba(255,255,255,0.1);
+ border: 1px solid rgba(255,255,255,0.3);
+ border-radius: 30px;
+ padding: 5px 14px;
+ font-size: 0.75rem;
+ font-weight: 600;
+ color: #fff;
+ display: inline-flex;
+ align-items: center;
+ gap: 7px;
+ text-decoration: none;
+ transition: all 0.2s ease;
+ letter-spacing: 0.3px;
+ }
+ .logout-nav-btn i {
+ font-size: 0.8rem;
+ color: var(--rly-gold);
+ }
+ .logout-nav-btn:hover {
+ background: rgba(255,255,255,0.25);
+ border-color: var(--rly-gold);
+ color: white;
+ transform: translateY(-1px);
+ }
+ .logout-nav-btn:active {
+ transform: translateY(1px);
+ }
+
+/* Right side controls wrapper */
+.nav-controls {
+ display: flex;
+ align-items: center;
+ gap: 15px;
+ margin-left: auto;
+}
+
+.user-badge {
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ background: rgba(255,255,255,0.08);
+ padding: 0.2rem 0.9rem 0.2rem 0.7rem;
+ border-radius: 40px;
+ border-left: 2px solid var(--rly-gold);
+}
+.user-badge i {
+ font-size: 0.9rem;
+ color: var(--rly-gold);
+}
+.user-badge span {
+ font-size: 0.75rem;
+ font-weight: 500;
+ color: #eef2ff;
+ letter-spacing: 0.02em;
+}
+.role-hod {
+ background: var(--rly-gold);
+ color: var(--rly-blue);
+ font-weight: 700;
+ font-size: 0.65rem;
+ padding: 2px 8px;
+ border-radius: 20px;
+ margin-left: 6px;
+}
+
+/* Month/Year row */
+.month-year-row {
+ background: white;
+ border-radius: 12px;
+ margin: 0 1.5rem 1.5rem 1.5rem;
+ padding: 0.75rem 1.25rem;
+ border: 1px solid var(--border);
+ box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+.month-year-row .form-label {
+ font-size: 0.75rem;
+ font-weight: 700;
+ text-transform: uppercase;
+ color: var(--rly-blue);
+ margin-bottom: 0.25rem;
+}
+.month-year-row .form-select {
+ font-size: 0.85rem;
+ border-radius: 8px;
+ border-color: var(--border);
+}
+ 
+ /* ── PAGE WRAPPER ── */
+ .page-wrapper { flex: 1; padding: 1.75rem 1.5rem 5rem; }
+ 
+ /* ── BREADCRUMB ── */
+ .breadcrumb-bar {
+ background: #fff;
+ border: 1px solid var(--border);
+ border-radius: 6px;
+ padding: .5rem 1rem;
+ margin-bottom: 1.25rem;
+ }
+ .breadcrumb { margin: 0; font-size: .78rem; }
+ .breadcrumb-item a { color: var(--rly-light); text-decoration: none; }
+ .breadcrumb-item a:hover { text-decoration: underline; }
+ .breadcrumb-item.active { color: #5c6b7a; }
+ .breadcrumb-item+.breadcrumb-item::before { color: #5c6b7a; }
+ 
+ /* ── PAGE HEADING ── */
+ .page-heading h4 {
+ font-family: 'Noto Serif', serif;
+ font-size: 1.15rem; font-weight: 700;
+ color: var(--rly-blue); margin: 0;
+ }
+ .page-heading p { font-size: .78rem; color: #5c6b7a; margin: .2rem 0 0; }
+ 
+ /* ── TABLE CARD ── */
+ .table-card {
+ background: #fff;
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ overflow: hidden;
+ box-shadow: 0 2px 8px rgba(0,0,0,.07);
+ }
+ .table-card-header {
+ background: var(--rly-blue);
+ padding: .75rem 1.1rem;
+ display: flex;
+ align-items: center;
+ gap: .75rem;
+ }
+ .table-card-header h6 {
+ color: #fff; font-weight: 600; font-size: .88rem;
+ margin: 0; letter-spacing: .02em;
+ }
+ 
+ /* ── TABLE ── */
+ .kpi-table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+ .kpi-table thead th {
+ background: #f0f4f9;
+ color: var(--rly-blue);
+ font-weight: 700; font-size: .72rem;
+ text-transform: uppercase; letter-spacing: .07em;
+ padding: .7rem .9rem;
+ border-bottom: 2px solid var(--border);
+ white-space: nowrap;
+ text-align: center;
+ }
+ .kpi-table thead th:nth-child(3) { text-align: left; }
+ .kpi-table tbody tr {
+ border-bottom: 1px solid #edf1f6;
+ transition: background .12s;
+ }
+ .kpi-table tbody tr:hover { background: #f5f8fc; }
+ .kpi-table tbody td {
+ padding: .65rem .9rem;
+ vertical-align: middle;
+ text-align: center;
+ border: 1px solid #d6dee8;
+ }
+ .kpi-table tbody td:nth-child(3) { text-align: left; }
+ .kpi-table tfoot td {
+ background: #f7f9fc;
+ font-size: .72rem; color: #5c6b7a;
+ padding: .55rem .9rem;
+ border-top: 1px solid var(--border);
+ }
+ 
+ /* ── STATIC CELLS ── */
+ .sn-cell { color: #5c6b7a; font-size: .75rem; font-weight: 600; }
+ .section-badge {
+ display: inline-block;
+ background: #e8eef8; color: var(--rly-blue);
+ border: 1px solid var(--border);
+ border-radius: 4px;
+ font-size: .72rem; font-weight: 600;
+ padding: .2rem .55rem;
+ white-space: nowrap;
+ }
+ .kpi-name-cell { font-weight: 600; color: #1a2a3a; text-align: left !important; padding-left: 20px !important; }
+ .unit-cell { color: #5c6b7a; font-size: .78rem; }
+ .target-cell { font-weight: 700; color: var(--rly-blue); }
+ 
+ /* ── NUMBER INPUTS ── */
+ .kpi-input {
+ width: 100%;
+ min-width: 90px;
+ padding: .35rem .55rem;
+ font-size: .82rem;
+ font-family: 'Noto Sans', sans-serif;
+ font-weight: 600;
+ color: #1a2a3a;
+ background: #f8fafc;
+ border: 1px solid var(--border);
+ border-radius: 5px;
+ text-align: center;
+ transition: border-color .15s, box-shadow .15s, background .15s;
+ outline: none;
+ }
+ .kpi-input:focus {
+ border-color: var(--rly-light);
+ background: #fff;
+ box-shadow: 0 0 0 3px rgba(0,85,165,.12);
+ }
+ .kpi-input:hover { border-color: #9ab0cc; }
+ 
+ /* ── ACTION BUTTONS ── */
+ .btn-area {
+ display: flex;
+ align-items: center;
+ gap: .75rem;
+ flex-wrap: wrap;
+ padding: 1rem 1.1rem;
+ background: #f7f9fc;
+ border-top: 1px solid var(--border);
+ }
+ .btn-draft {
+ background: #fff;
+ color: var(--rly-blue);
+ border: 2px solid var(--rly-blue);
+ border-radius: 6px;
+ padding: .45rem 1.2rem;
+ font-size: .82rem; font-weight: 700;
+ font-family: 'Noto Sans', sans-serif;
+ display: inline-flex; align-items: center; gap: .4rem;
+ cursor: pointer;
+ transition: background .15s, color .15s, transform .1s;
+ }
+ .btn-draft:hover {
+ background: var(--rly-blue);
+ color: #fff;
+ transform: translateY(-1px);
+ }
+ .btn-submit {
+ background: var(--rly-blue);
+ color: #fff;
+ border: 2px solid var(--rly-blue);
+ border-radius: 6px;
+ padding: .45rem 1.2rem;
+ font-size: .82rem; font-weight: 700;
+ font-family: 'Noto Sans', sans-serif;
+ display: inline-flex; align-items: center; gap: .4rem;
+ cursor: pointer;
+ transition: background .15s, transform .1s;
+ }
+ .btn-submit:hover {
+ background: var(--rly-mid);
+ transform: translateY(-1px);
+ }
+ .btn-hint {
+ font-size: .72rem; color: #5c6b7a;
+ margin-left: auto;
+ }
+ .kpi-input[readonly]{
+    background:#e9ecef !important;
+    color:#6c757d !important;
+    cursor:not-allowed;
+    border:1px solid #ced4da;
+}
+
+.kpi-input[readonly]:focus{
+    box-shadow:none;
+    border:1px solid #ced4da;
+}
+ 
+ /* ── FOOTER ── */
+ .site-footer {
+ background: var(--rly-blue);
+ border-top: 2px solid var(--rly-gold);
+ padding: .5rem 1.5rem;
+ display: flex; align-items: center; justify-content: space-between;
+ flex-wrap: wrap; gap: .5rem;
+ }
+ .section-header-row td{
+    background:#fff3b0;
+    color:#c1121f;
+    font-weight:700;
+    font-size:18px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    padding:18px 15px !important;
+    border:1px solid #d4a017 !important;
+    text-align:center !important;
+    width:100%;
+}
+
+.kpi-name-cell{
+    font-weight:600;
+    color: #1a2a3a;
+    text-align: left !important;
+    padding-left: 20px !important;
+}
+
+.kpi-table tbody tr:hover{
+    background:#f7f9fc;
+}
+ .site-footer p { font-size: .68rem; color: rgba(255,255,255,.65); margin: 0; }
+ .site-footer .gov { font-size: .65rem; color: var(--rly-gold); font-weight: 600; }
+
+ /* Responsive */
+ @media (max-width: 992px) {
+   .top-navbar {
+     flex-direction: column;
+     align-items: stretch;
+     gap: 10px;
+   }
+   .nav-controls {
+     margin-left: 0;
+     justify-content: space-between;
+   }
+   .user-info {
+     margin-left: 0;
+     text-align: left;
+   }
+   .month-year-row {
+     margin: 0 0 1.5rem 0;
+   }
+ }
+ </style>
+</head>
+<body>
+ 
+<!-- ══ NAVBAR with LOGO ══════════════════════════════════════════════ -->
+<nav class="top-navbar">
+ <!-- Logo Image - properly sized -->
+ <div class="emblem">
+   <img
+     src="{{ url_for('static', filename='images/images.png') }}"
+     alt="Southern Railway Emblem"
+     class="logo-img"
+     onerror="this.style.display='none'; this.parentElement.innerHTML='<svg class=\'ir-logo\' viewBox=\'0 0 44 44\' fill=\'none\' xmlns=\'http://www.w3.org/2000/svg\'><circle cx=\'22\' cy=\'22\' r=\'20\' stroke=\'#d4a017\' stroke-width=\'2.5\' fill=\'none\'/><g stroke=\'#d4a017\' stroke-width=\'1.6\'><line x1=\'22\' y1=\'4\' x2=\'22\' y2=\'40\'/><line x1=\'4\' y1=\'22\' x2=\'40\' y2=\'22\'/><line x1=\'8.7\' y1=\'8.7\' x2=\'35.3\' y2=\'35.3\'/><line x1=\'35.3\' y1=\'8.7\' x2=\'8.7\' y2=\'35.3\'/></g><circle cx=\'22\' cy=\'22\' r=\'5\' fill=\'#d4a017\'/><circle cx=\'22\' cy=\'22\' r=\'2\' fill=\'#003366\'/></svg>';">
+ </div>
+
+ <div>
+   <div class="brand-title">Indian Railways</div>
+   <div class="brand-sub">भारतीय रेल</div>
+ </div>
+ 
+ <div class="nav-divider"></div>
+ 
+ <div>
+   <div class="app-name">Division Performance Monitoring System</div>
+   <div class="app-sub">Palakkad Division &nbsp;|&nbsp; Southern Railway</div>
+ </div>
+
+ <!-- User Info -->
+ <div class="user-info">
+   <div class="welcome">
+     Welcome, {{ session.username }}
+   </div>
+   <div class="empid">
+     Employee ID : {{ session.user_id }}
+   </div>
+ </div>
+
+ <!-- Logout Button -->
+ <div class="nav-controls">
+   <div class="user-badge">
+     <i class="fas fa-user-tie"></i>
+     <span>Department User</span>
+   </div>
+   <a href="/logout" class="logout-nav-btn" id="logoutBtn">
+     <i class="fas fa-sign-out-alt"></i> Logout
+   </a>
+ </div>
+</nav>
+
+<!-- ══ MONTH & YEAR SELECTION ═══════════════════ -->
+<div class="month-year-row row g-3 align-items-end">
+ <div class="col-md-3">
+   <label class="form-label">Month</label>
+   <select name="month" id="monthSelect" class="form-select">
+     <option value="JUNE">JUNE</option>
+     <option value="JULY">JULY</option>
+     <option value="AUGUST">AUGUST</option>
+     <option value="SEPTEMBER">SEPTEMBER</option>
+     <option value="OCTOBER">OCTOBER</option>
+     <option value="NOVEMBER">NOVEMBER</option>
+     <option value="DECEMBER">DECEMBER</option>
+     <option value="JANUARY">JANUARY</option>
+     <option value="FEBRUARY">FEBRUARY</option>
+     <option value="MARCH">MARCH</option>
+     <option value="APRIL">APRIL</option>
+     <option value="MAY">MAY</option>    
+   </select>
+ </div>
+ <div class="col-md-3">
+   <label class="form-label">Year</label>
+   <select name="year" id="yearSelect" class="form-select">
+     {% for y in range(2026,2037) %}
+       <option value="{{ y }}">{{ y }}</option>
+     {% endfor %}
+   </select>
+ </div>
+</div>
+
+<!-- ══ PAGE WRAPPER ════════════════════════════════════════ -->
+<div class="page-wrapper">
+ 
+ <!-- Breadcrumb -->
+ <div class="breadcrumb-bar">
+   <nav aria-label="breadcrumb">
+     <ol class="breadcrumb">
+       <li class="breadcrumb-item"><a href="/"><i class="fas fa-home me-1"></i>Home</a></li>
+       <li class="breadcrumb-item"><a href="#">Department Dashboard</a></li>
+       <li class="breadcrumb-item active">KPI Entry</li>
+     </ol>
+   </nav>
+ </div>
+ 
+ <!-- Page heading -->
+ <div class="page-heading d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
+   <div>
+     <h4><i class="fas fa-pencil-alt me-2" style="color:var(--rly-gold)"></i>Department KPI Entry</h4>
+     <p>Enter monthly and cumulative performance data for your department KPIs</p>
+   </div>
+ </div>
+ 
+ <!-- Form -->
+ <form method="POST" id="kpiForm">
+ 
+   <!-- Table card -->
+   <div class="table-card">
+     <div class="table-card-header">
+       <i class="fas fa-table" style="color:var(--rly-gold);"></i>
+       <h6>KPI Performance Data Entry</h6>
+     </div>
+     
+     <div class="table-responsive">
+       <table class="kpi-table">
+         <thead>
+           <tr>
+              <th>S.N</th>
+              <th>KPI</th>
+              <th>Unit</th>
+              <th>Annual Target</th>
+              <th>Previous Year</th>
+              <th>Performance For Month</th>
+              <th>Cumulative Performance</th>
+            </tr>
+         </thead>
+         <tbody>
+           {% set current_section = namespace(value='') %}
+           {% for kpi in kpis %}
+             {% if current_section.value != kpi.section_name %}
+               <tr class="section-header-row">
+                 <td colspan="7">{{ kpi.section_name }}</td>
+               </tr>
+               {% set current_section.value = kpi.section_name %}
+             {% endif %}
+             <tr>
+               <td class="sn-cell">{{ loop.index }}</td>
+               <td class="kpi-name-cell">{{ kpi.kpi_name }}</td>
+               <td class="unit-cell">{{ kpi.unit }}</td>
+               <td class="target-cell">{{ kpi.annual_target }}</td>
+               <td>
+                 <input type="text" value="{{ kpi.previous_year_value if kpi.previous_year_value else 'N/A' }}" class="kpi-input" readonly>
+               </td>
+               <td>
+                 <input type="number" step="0.01" name="month_{{ kpi.id }}" value="{{ kpi.performance_month if kpi.performance_month else '' }}" class="kpi-input" placeholder="0.00"
+                   {% if kpi.department_id|int != user_department|int %} readonly {% endif %}>
+               </td>
+               <td>
+                 <input type="number" step="0.01" name="cum_{{ kpi.id }}" value="{{ kpi.cumulative_performance if kpi.cumulative_performance else '' }}" class="kpi-input" placeholder="0.00"
+                   {% if kpi.department_id != user_department %} readonly {% endif %}>
+               </td>
+             </tr>
+           {% endfor %}
+         </tbody>
+         <tfoot>
+           <tr>
+             <td colspan="7">
+               <i class="fas fa-info-circle me-1"></i>
+               Palakkad Division &nbsp;|&nbsp; Southern Railway &nbsp;|&nbsp; Government of India
+             </td>
+           </tr>
+         </tfoot>
+       </table>
+     </div>
+     
+     <!-- Action buttons -->
+     <div class="btn-area">
+       <button type="submit" name="action" value="draft" class="btn-draft" id="draftBtn">
+         <i class="fas fa-save"></i>Save Draft
+       </button>
+       <button type="submit" name="action" value="submit" class="btn-submit" id="submitBtn">
+         <i class="fas fa-paper-plane"></i>Submit To HOD
+       </button>
+       <span class="btn-hint">
+         <i class="fas fa-info-circle me-1"></i>
+         Save Draft to preserve data &nbsp;|&nbsp; Submit To HOD for final submission
+       </span>
+     </div>
+   </div>
+   
+   <!-- Hidden fields for month/year -->
+   <input type="hidden" name="selected_month" id="hiddenMonth" value="JUNE">
+   <input type="hidden" name="selected_year" id="hiddenYear" value="2026">
+   
+ </form>
+ 
+</div><!-- /page-wrapper -->
+ 
+<!-- ══ FOOTER ══════════════════════════════════════════════ -->
+<footer class="site-footer">
+ <p><i class="fas fa-train me-1"></i><strong style="color:#fff;">Palakkad Division</strong> &nbsp;|&nbsp; Southern Railway &nbsp;|&nbsp; Government of India</p>
+ <p class="gov"><i class="fas fa-shield-alt me-1"></i>Official Government Portal</p>
+</footer>
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+ (function() {
+   const monthSelect = document.getElementById('monthSelect');
+   const yearSelect = document.getElementById('yearSelect');
+   const hiddenMonth = document.getElementById('hiddenMonth');
+   const hiddenYear = document.getElementById('hiddenYear');
+   const kpiForm = document.getElementById('kpiForm');
+   const draftBtn = document.getElementById('draftBtn');
+   const submitBtn = document.getElementById('submitBtn');
+   
+   if (monthSelect && hiddenMonth) {
+     hiddenMonth.value = monthSelect.value;
+     monthSelect.addEventListener('change', function() {
+       hiddenMonth.value = monthSelect.value;
+       if (kpiForm) kpiForm.submit();
+     });
+   }
+   
+   if (yearSelect && hiddenYear) {
+     hiddenYear.value = yearSelect.value;
+     yearSelect.addEventListener('change', function() {
+       hiddenYear.value = yearSelect.value;
+       if (kpiForm) kpiForm.submit();
+     });
+   }
+   
+   // Prevent double submission
+   let isSubmitting = false;
+   
+   if (kpiForm) {
+     kpiForm.addEventListener('submit', function(e) {
+       if (isSubmitting) {
+         e.preventDefault();
+         return false;
+       }
+       
+       if (monthSelect && hiddenMonth) hiddenMonth.value = monthSelect.value;
+       if (yearSelect && hiddenYear) hiddenYear.value = yearSelect.value;
+       
+       isSubmitting = true;
+       
+       if (draftBtn) draftBtn.disabled = true;
+       if (submitBtn) submitBtn.disabled = true;
+       
+       // Get the clicked button
+       const activeBtn = e.submitter;
+       if (activeBtn) {
+         const originalText = activeBtn.innerHTML;
+         activeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+         
+         setTimeout(function() {
+           if (draftBtn) draftBtn.disabled = false;
+           if (submitBtn) submitBtn.disabled = false;
+           activeBtn.innerHTML = originalText;
+           isSubmitting = false;
+         }, 10000);
+       }
+     });
+   }
+   
+   // Logout confirmation
+   const logoutBtn = document.getElementById('logoutBtn');
+   if (logoutBtn) {
+     logoutBtn.addEventListener('click', function(event) {
+       const confirmLogout = confirm('Are you sure you want to logout? Any unsaved changes will be lost.');
+       if (!confirmLogout) {
+         event.preventDefault();
+       }
+     });
+   }
+   
+   console.log('KPI Entry dashboard ready with logo sizing fix');
+ })();
+</script>
+</body>
+</html>

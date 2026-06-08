@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8"/>
+ <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+ <title>HOD Review – DPMS</title>
+ <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+ <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+ <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Serif:wght@700&display=swap" rel="stylesheet"/>
+ <style>
+ :root {
+ --rly-blue: #003366;
+ --rly-mid: #004080;
+ --rly-light: #0055a5;
+ --rly-gold: #d4a017;
+ --rly-bg: #eef2f7;
+ --border: #cdd8e3;
+ }
+ 
+ body {
+ font-family: 'Noto Sans', sans-serif;
+ background: var(--rly-bg);
+ color: #1a2a3a;
+ min-height: 100vh;
+ display: flex;
+ flex-direction: column;
+ }
+ 
+ /* ── NAVBAR with logo styling ── */
+ .top-navbar {
+ background: var(--rly-blue);
+ border-bottom: 3px solid var(--rly-gold);
+ padding: .6rem 1.5rem;
+ display: flex;
+ align-items: center;
+ gap: 1rem;
+ box-shadow: 0 2px 8px rgba(0,0,0,.35);
+ position: sticky;
+ top: 0;
+ z-index: 1000;
+ }
+ 
+ /* Logo image styling */
+ .logo-img {
+ height: 42px;
+ width: auto;
+ display: block;
+ }
+ 
+ .emblem {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ flex-shrink: 0;
+ }
+ 
+ .brand-title {
+ font-family: 'Noto Serif', serif;
+ font-size: .92rem; font-weight: 700;
+ color: #fff; letter-spacing: .04em;
+ text-transform: uppercase; line-height: 1.2;
+ }
+ .brand-sub { font-size: .62rem; color: var(--rly-gold); letter-spacing: .1em; text-transform: uppercase; }
+ .nav-divider { width: 1px; height: 34px; background: rgba(255,255,255,.2); margin: 0 .5rem; }
+ .app-name { font-size: .78rem; font-weight: 600; color: #c8d8f0; letter-spacing: .04em; text-transform: uppercase; }
+ .app-sub { font-size: .65rem; color: rgba(255,255,255,.5); }
+ 
+ /* Right side user + logout */
+ .nav-controls {
+ margin-left: auto;
+ display: flex;
+ align-items: center;
+ gap: 1.2rem;
+ }
+ .user-badge {
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ background: rgba(255,255,255,0.08);
+ padding: 0.2rem 0.9rem 0.2rem 0.7rem;
+ border-radius: 40px;
+ border-left: 2px solid var(--rly-gold);
+ }
+ .user-badge i {
+ font-size: 0.9rem;
+ color: var(--rly-gold);
+ }
+ .user-badge span {
+ font-size: 0.75rem;
+ font-weight: 500;
+ color: #eef2ff;
+ letter-spacing: 0.02em;
+ }
+ .role-hod {
+ background: var(--rly-gold);
+ color: var(--rly-blue);
+ font-weight: 700;
+ font-size: 0.65rem;
+ padding: 2px 8px;
+ border-radius: 20px;
+ margin-left: 6px;
+ }
+ .logout-nav-btn {
+ background: rgba(255,255,255,0.1);
+ border: 1px solid rgba(255,255,255,0.3);
+ border-radius: 30px;
+ padding: 5px 14px;
+ font-size: 0.75rem;
+ font-weight: 600;
+ color: #fff;
+ display: inline-flex;
+ align-items: center;
+ gap: 7px;
+ text-decoration: none;
+ transition: all 0.2s ease;
+ letter-spacing: 0.3px;
+ }
+ .logout-nav-btn i {
+ font-size: 0.8rem;
+ color: var(--rly-gold);
+ }
+ .logout-nav-btn:hover {
+ background: rgba(255,255,255,0.25);
+ border-color: var(--rly-gold);
+ color: white;
+ transform: translateY(-1px);
+ }
+ .logout-nav-btn:active {
+ transform: translateY(1px);
+ }
+ 
+ /* ── PAGE WRAPPER ── */
+ .page-wrapper { flex: 1; padding: 1.75rem 1.5rem 5rem; }
+ 
+ /* ── BREADCRUMB ── */
+ .breadcrumb-bar {
+ background: #fff;
+ border: 1px solid var(--border);
+ border-radius: 6px;
+ padding: .5rem 1rem;
+ margin-bottom: 1.25rem;
+ }
+ .breadcrumb { margin: 0; font-size: .78rem; }
+ .breadcrumb-item a { color: var(--rly-light); text-decoration: none; }
+ .breadcrumb-item a:hover { text-decoration: underline; }
+ .breadcrumb-item.active { color: #5c6b7a; }
+ .breadcrumb-item+.breadcrumb-item::before { color: #5c6b7a; }
+ 
+ /* ── PAGE HEADING ── */
+ .page-heading h4 {
+ font-family: 'Noto Serif', serif;
+ font-size: 1.15rem; font-weight: 700;
+ color: var(--rly-blue); margin: 0;
+ }
+ .page-heading p { font-size: .78rem; color: #5c6b7a; margin: .2rem 0 0; }
+ 
+ /* ── TABLE CARD ── */
+ .table-card {
+ background: #fff;
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ overflow: hidden;
+ box-shadow: 0 2px 8px rgba(0,0,0,.07);
+ }
+ .table-card-header {
+ background: var(--rly-blue);
+ padding: .75rem 1.1rem;
+ display: flex;
+ align-items: center;
+ gap: .75rem;
+ }
+ .table-card-header h6 {
+ color: #fff; font-weight: 600; font-size: .88rem;
+ margin: 0; letter-spacing: .02em;
+ }
+ 
+ /* ── TABLE ── */
+ .kpi-table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+ .kpi-table thead th {
+ background: #f0f4f9;
+ color: var(--rly-blue);
+ font-weight: 700; font-size: .72rem;
+ text-transform: uppercase; letter-spacing: .07em;
+ padding: .7rem .9rem;
+ border-bottom: 2px solid var(--border);
+ white-space: nowrap;
+ }
+ .kpi-table tbody tr {
+ border-bottom: 1px solid #edf1f6;
+ transition: background .12s;
+ }
+ .kpi-table tbody tr:hover { background: #f5f8fc; }
+ .kpi-table tbody td { padding: .7rem .9rem; vertical-align: middle; }
+ .kpi-table tfoot td {
+ background: #f7f9fc;
+ font-size: .72rem; color: #5c6b7a;
+ padding: .55rem .9rem;
+ border-top: 1px solid var(--border);
+ }
+ 
+ /* ── STATUS BADGES ── */
+ .badge-status {
+ font-size: .7rem; font-weight: 700;
+ padding: .3rem .65rem; border-radius: 12px;
+ letter-spacing: .04em; text-transform: uppercase;
+ display: inline-flex; align-items: center; gap: .35rem;
+ white-space: nowrap;
+ }
+ .badge-submitted { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+ .badge-approved { background: #d1e7dd; color: #0a5c36; border: 1px solid #198754; }
+ .badge-returned { background: #f8d7da; color: #842029; border: 1px solid #dc3545; }
+ .badge-forwarded { background: #cfe2ff; color: #0a3e7a; border: 1px solid #0d6efd; }
+ .badge-frozen { background: #e2e3e5; color: #41464b; border: 1px solid #6c757d; }
+ .badge-default { background: #e8eef8; color: var(--rly-blue); border: 1px solid var(--border); }
+ 
+ /* ── ACTION BUTTONS ── */
+ .btn-approve {
+ background: #198754; color: #fff;
+ border: none;
+ border-radius: 5px;
+ padding: .3rem .75rem;
+ font-size: .75rem;
+ font-weight: 600;
+ display: inline-flex;
+ align-items: center;
+ gap: .35rem;
+ text-decoration: none;
+ transition: background .15s, transform .1s;
+ white-space: nowrap;
+ cursor: pointer;
+ }
+ .btn-approve:hover { background: #157347; color: #fff; transform: translateY(-1px); }
+ .btn-approve:disabled {
+ background: #6c757d;
+ cursor: not-allowed;
+ opacity: 0.7;
+ }
+ 
+ .btn-return {
+ background: #dc3545; color: #fff;
+ border: none;
+ border-radius: 5px;
+ padding: .3rem .75rem;
+ font-size: .75rem;
+ font-weight: 600;
+ display: inline-flex;
+ align-items: center;
+ gap: .35rem;
+ text-decoration: none;
+ transition: background .15s, transform .1s;
+ white-space: nowrap;
+ cursor: pointer;
+ }
+ .btn-return:hover { background: #bb2d3b; color: #fff; transform: translateY(-1px); }
+ .btn-return:disabled {
+ background: #6c757d;
+ cursor: not-allowed;
+ opacity: 0.7;
+ }
+ 
+ /* ── FOOTER ── */
+ .site-footer {
+ background: var(--rly-blue);
+ border-top: 2px solid var(--rly-gold);
+ padding: .5rem 1.5rem;
+ display: flex; align-items: center; justify-content: space-between;
+ flex-wrap: wrap; gap: .5rem;
+ }
+ .site-footer p { font-size: .68rem; color: rgba(255,255,255,.65); margin: 0; }
+ .site-footer .gov { font-size: .65rem; color: var(--rly-gold); font-weight: 600; }
+ 
+ /* ── SN CELL ── */
+ .sn-cell { color: #5c6b7a; font-size: .75rem; }
+ 
+ /* ── PERF VALUE ── */
+ .perf-val { font-weight: 600; }
+ 
+ /* responsiveness */
+ @media (max-width: 780px) {
+ .top-navbar {
+ flex-wrap: wrap;
+ padding: 0.6rem 1rem;
+ gap: 0.6rem;
+ }
+ .nav-controls {
+ margin-left: 0;
+ width: 100%;
+ justify-content: space-between;
+ margin-top: 4px;
+ }
+ .user-badge {
+ padding: 0.2rem 0.7rem;
+ }
+ }
+ </style>
+</head>
+<body>
+ 
+<!-- ══ NAVBAR with LOGOUT BUTTON and Railway Logo (HOD Dashboard) ═════════════════ -->
+<nav class="top-navbar">
+ <!-- Railway Logo Image -->
+ <div class="emblem">
+  <img src="{{ url_for('static', filename='images/images.png') }}" 
+       alt="Southern Railway Emblem" 
+       class="logo-img"
+       onerror="this.style.display='none'; this.parentElement.innerHTML='<svg class=\'ir-logo\' viewBox=\'0 0 44 44\' fill=\'none\' xmlns=\'http://www.w3.org/2000/svg\'><circle cx=\'22\' cy=\'22\' r=\'20\' stroke=\'#d4a017\' stroke-width=\'2.5\' fill=\'none\'/><g stroke=\'#d4a017\' stroke-width=\'1.6\'><line x1=\'22\' y1=\'4\' x2=\'22\' y2=\'40\'/><line x1=\'4\' y1=\'22\' x2=\'40\' y2=\'22\'/><line x1=\'8.7\' y1=\'8.7\' x2=\'35.3\' y2=\'35.3\'/><line x1=\'35.3\' y1=\'8.7\' x2=\'8.7\' y2=\'35.3\'/></g><circle cx=\'22\' cy=\'22\' r=\'5\' fill=\'#d4a017\'/><circle cx=\'22\' cy=\'22\' r=\'2\' fill=\'#003366\'/></svg>'">
+ </div>
+ 
+ <div>
+  <div class="brand-title">Indian Railways</div>
+  <div class="brand-sub">भारतीय रेल</div>
+ </div>
+ 
+ <div class="nav-divider"></div>
+ 
+ <div>
+  <div class="app-name">Division Performance Monitoring System</div>
+  <div class="app-sub">Palakkad Division &nbsp;|&nbsp; Southern Railway</div>
+ </div>
+ 
+ <!-- Right side: HOD info + logout button -->
+ <div class="nav-controls">
+  <div class="user-badge">
+   <i class="fas fa-user-tie"></i>
+   <span>HOD <span class="role-hod">Reviewer</span></span>
+  </div>
+  <a href="/logout" class="logout-nav-btn" id="hodLogoutBtn">
+   <i class="fas fa-sign-out-alt"></i> Logout
+  </a>
+ </div>
+</nav>
+ 
+<!-- ══ PAGE WRAPPER ════════════════════════════════════════ -->
+<div class="page-wrapper">
+ 
+ <!-- Breadcrumb -->
+ <div class="breadcrumb-bar">
+  <nav aria-label="breadcrumb">
+   <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/"><i class="fas fa-home me-1"></i>Home</a></li>
+    <li class="breadcrumb-item"><a href="#">HOD Dashboard</a></li>
+    <li class="breadcrumb-item active">KPI Review</li>
+   </ol>
+  </nav>
+ </div>
+ 
+ <!-- Page heading -->
+ <div class="page-heading d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
+  <div>
+   <h4><i class="fas fa-clipboard-check me-2" style="color:var(--rly-gold)"></i>Submitted KPIs</h4>
+   <p>Review and action KPI submissions from departments</p>
+  </div>
+ </div>
+ 
+ <!-- Table card -->
+ <div class="table-card">
+  <div class="table-card-header">
+   <i class="fas fa-table" style="color:var(--rly-gold);"></i>
+   <h6>KPI Records – Pending HOD Review</h6>
+  </div>
+ 
+  <div class="table-responsive">
+   <table class="kpi-table">
+    <thead>
+     <tr>
+       <th>#</th>
+       <th><i class="fas fa-chart-bar me-1"></i>KPI</th>
+       <th><i class="fas fa-calendar-day me-1"></i>Monthly</th>
+       <th><i class="fas fa-layer-group me-1"></i>Cumulative</th>
+       <th><i class="fas fa-info-circle me-1"></i>Status</th>
+       <th><i class="fas fa-cogs me-1"></i>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+ 
+     {% for row in rows %}
+     <tr data-id="{{ row.id }}" data-status="{{ row.status }}">
+      <td class="sn-cell">{{ loop.index }}</td>
+      <td><span style="font-weight:600;">{{ row.kpi_name }}</span></td>
+      <td><span class="perf-val">{{ row.performance_month }}</span></td>
+      <td><span class="perf-val">{{ row.cumulative_performance }}</span></td>
+      <td class="status-cell">
+       {% if row.status == 'SUBMITTED' %}
+        <span class="badge-status badge-submitted"><i class="fas fa-clock"></i>{{ row.status }}</span>
+       {% elif row.status == 'APPROVED' %}
+        <span class="badge-status badge-approved"><i class="fas fa-check-circle"></i>{{ row.status }}</span>
+       {% elif row.status == 'RETURNED' %}
+        <span class="badge-status badge-returned"><i class="fas fa-undo"></i>{{ row.status }}</span>
+       {% elif row.status == 'FORWARDED' %}
+        <span class="badge-status badge-forwarded"><i class="fas fa-share"></i>{{ row.status }}</span>
+       {% elif row.status == 'FROZEN' %}
+        <span class="badge-status badge-frozen"><i class="fas fa-lock"></i>{{ row.status }}</span>
+       {% else %}
+        <span class="badge-status badge-default">{{ row.status }}</span>
+       {% endif %}
+       </td>
+      <td class="action-cell">
+       <div class="d-flex gap-2 flex-wrap">
+        {% if row.status == 'SUBMITTED' %}
+         <a href="/approve/{{ row.id }}" class="btn-approve" data-id="{{ row.id }}" data-kpiname="{{ row.kpi_name }}">
+          <i class="fas fa-check"></i>Approve
+         </a>
+         <a href="/return/{{ row.id }}" class="btn-return" data-id="{{ row.id }}" data-kpiname="{{ row.kpi_name }}">
+          <i class="fas fa-undo"></i>Return
+         </a>
+        {% elif row.status == 'APPROVED' %}
+         <button class="btn-approve" disabled>
+          <i class="fas fa-check-circle"></i> Approved
+         </button>
+         <button class="btn-return" disabled>
+          <i class="fas fa-undo"></i> Return
+         </button>
+        {% elif row.status == 'RETURNED' %}
+         <button class="btn-approve" disabled>
+          <i class="fas fa-check"></i> Approve
+         </button>
+         <button class="btn-return" disabled>
+          <i class="fas fa-check-circle"></i> Returned
+         </button>
+        {% else %}
+         <button class="btn-approve" disabled>
+          <i class="fas fa-check"></i> Approve
+         </button>
+         <button class="btn-return" disabled>
+          <i class="fas fa-undo"></i> Return
+         </button>
+        {% endif %}
+       </div>
+       </td>
+      </tr>
+     {% endfor %}
+ 
+    </tbody>
+    <tfoot>
+     <tr>
+      <td colspan="6">
+       <i class="fas fa-info-circle me-1"></i>
+       Palakkad Division &nbsp;|&nbsp; Southern Railway &nbsp;|&nbsp; Government of India
+       </td>
+      </tr>
+    </tfoot>
+   </table>
+  </div>
+ </div>
+ 
+</div><!-- /page-wrapper -->
+ 
+<!-- ══ FOOTER ══════════════════════════════════════════════ -->
+<footer class="site-footer">
+ <p><i class="fas fa-train me-1"></i><strong style="color:#fff;">Palakkad Division</strong> &nbsp;|&nbsp; Southern Railway &nbsp;|&nbsp; Government of India</p>
+ <p class="gov"><i class="fas fa-shield-alt me-1"></i>Official Government Portal</p>
+</footer>
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+ (function() {
+   // Logout confirmation for HOD dashboard
+   const logoutButton = document.getElementById('hodLogoutBtn');
+   if (logoutButton) {
+     logoutButton.addEventListener('click', function(event) {
+       const confirmLogout = confirm('Are you sure you want to logout from HOD Dashboard? Any pending reviews will not be saved.');
+       if (!confirmLogout) {
+         event.preventDefault();
+         return false;
+       }
+       return true;
+     });
+   }
+   
+   // Confirmations for Approve actions
+   const approveBtns = document.querySelectorAll('.btn-approve');
+   approveBtns.forEach(btn => {
+     btn.addEventListener('click', function(e) {
+       const kpiName = this.getAttribute('data-kpiname') || 
+                      (this.closest('tr')?.querySelector('td:nth-child(2) span')?.innerText || 'this KPI');
+       const confirmApprove = confirm(`Approve "${kpiName}"?\n\nOnce approved, it will be forwarded to Nodal Officer.`);
+       if (!confirmApprove) {
+         e.preventDefault();
+       }
+     });
+   });
+   
+   // Confirmations for Return actions
+   const returnBtns = document.querySelectorAll('.btn-return');
+   returnBtns.forEach(btn => {
+     btn.addEventListener('click', function(e) {
+       const kpiName = this.getAttribute('data-kpiname') || 
+                      (this.closest('tr')?.querySelector('td:nth-child(2) span')?.innerText || 'this KPI');
+       let remarks = prompt(`Return "${kpiName}" to department for revision.\n\nPlease provide remarks (optional):`, 'Needs revision');
+       // remarks can be passed via URL parameter if needed
+       if (remarks === null) {
+         e.preventDefault();
+       }
+     });
+   });
+   
+   console.log('HOD Review Dashboard ready — Logo integrated, logout and action confirmations active.');
+ })();
+</script>
+</body>
+</html>
