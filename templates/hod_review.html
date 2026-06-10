@@ -278,6 +278,44 @@
  color: #2c6b2f;
  }
  
+ /* Filter section styling */
+ .filter-section {
+ background: #fff;
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ padding: 1rem;
+ margin-bottom: 1.5rem;
+ }
+ .filter-label {
+ font-weight: 600;
+ font-size: 0.8rem;
+ color: var(--rly-blue);
+ margin-bottom: 0.5rem;
+ }
+ .filter-select {
+ border: 1px solid var(--border);
+ border-radius: 6px;
+ padding: 0.4rem 0.75rem;
+ font-size: 0.85rem;
+ }
+ .btn-filter {
+ background: var(--rly-blue);
+ color: white;
+ border: none;
+ border-radius: 6px;
+ padding: 0.4rem 1.2rem;
+ font-size: 0.85rem;
+ font-weight: 600;
+ display: inline-flex;
+ align-items: center;
+ gap: 0.5rem;
+ transition: all 0.2s;
+ }
+ .btn-filter:hover {
+ background: var(--rly-mid);
+ transform: translateY(-1px);
+ }
+ 
  /* ── FOOTER ── */
  .site-footer {
  background: var(--rly-blue);
@@ -379,14 +417,58 @@
    <p>Review and action KPI submissions from departments — includes submission timestamp from monthly_data.created_at</p>
   </div>
  </div>
+
+ <!-- Filter Section -->
+ <div class="filter-section">
+  <form method="GET" action="/hod" id="filterForm">
+   <div class="row align-items-end">
+    <div class="col-md-4">
+     <label class="filter-label">Month</label>
+     <select name="month" class="form-select filter-select">
+      <option value="JANUARY" {% if selected_month == 'JANUARY' %}selected{% endif %}>JANUARY</option>
+      <option value="FEBRUARY" {% if selected_month == 'FEBRUARY' %}selected{% endif %}>FEBRUARY</option>
+      <option value="MARCH" {% if selected_month == 'MARCH' %}selected{% endif %}>MARCH</option>
+      <option value="APRIL" {% if selected_month == 'APRIL' %}selected{% endif %}>APRIL</option>
+      <option value="MAY" {% if selected_month == 'MAY' %}selected{% endif %}>MAY</option>
+      <option value="JUNE" {% if selected_month == 'JUNE' %}selected{% endif %}>JUNE</option>
+      <option value="JULY" {% if selected_month == 'JULY' %}selected{% endif %}>JULY</option>
+      <option value="AUGUST" {% if selected_month == 'AUGUST' %}selected{% endif %}>AUGUST</option>
+      <option value="SEPTEMBER" {% if selected_month == 'SEPTEMBER' %}selected{% endif %}>SEPTEMBER</option>
+      <option value="OCTOBER" {% if selected_month == 'OCTOBER' %}selected{% endif %}>OCTOBER</option>
+      <option value="NOVEMBER" {% if selected_month == 'NOVEMBER' %}selected{% endif %}>NOVEMBER</option>
+      <option value="DECEMBER" {% if selected_month == 'DECEMBER' %}selected{% endif %}>DECEMBER</option>
+     </select>
+    </div>
+    <div class="col-md-3">
+     <label class="filter-label">Year</label>
+     <select name="year" class="form-select filter-select">
+      {% for y in range(2024, 2031) %}
+       <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+      {% endfor %}
+     </select>
+    </div>
+    <div class="col-md-2">
+     <button type="submit" class="btn-filter w-100">
+      <i class="fas fa-filter"></i> Filter
+     </button>
+    </div>
+    <div class="col-md-3">
+     <div class="text-end">
+      <span class="badge-status badge-default">
+       <i class="fas fa-calendar-alt"></i> 
+       Showing: {{ selected_month }} {{ selected_year }}
+      </span>
+     </div>
+    </div>
+   </div>
+  </form>
+ </div>
  
  <!-- Table card -->
  <div class="table-card">
   <div class="table-card-header d-flex justify-content-between align-items-center">
-
     <div class="d-flex align-items-center gap-2">
         <i class="fas fa-table" style="color:var(--rly-gold);"></i>
-
         <h6 class="mb-0">
             KPI Records – Pending HOD Review
             <span style="font-size:0.7rem;font-weight:normal;margin-left:0.5rem;">
@@ -395,79 +477,57 @@
             </span>
         </h6>
     </div>
-
     <button id="approveSelectedBtn" class="btn-approve">
         <i class="fas fa-check-circle"></i>
         Approve Selected
     </button>
-
-</div>
+  </div>
  
   <div class="table-responsive">
    <table class="kpi-table">
     <thead>
      <tr>
-       <th>#</th>
-       <th>
-    <input type="checkbox" id="selectAll">
-</th>
-<th><i class="fas fa-chart-bar me-1"></i>KPI</th>
+       <th><input type="checkbox" id="selectAll"></th>
+       <th>S.N</th>
+       <th><i class="fas fa-chart-bar me-1"></i>KPI</th>
        <th><i class="fas fa-calendar-day me-1"></i>Monthly</th>
        <th><i class="fas fa-layer-group me-1"></i>Cumulative</th>
        <th><i class="fas fa-clock me-1"></i>Submitted On</th>
        <th><i class="fas fa-info-circle me-1"></i>Status</th>
-             </tr>
+       <th><i class="fas fa-cog me-1"></i>Actions</th>
+      </tr>
     </thead>
     <tbody>
- 
-     {# 
-        IMPORTANT: The 'rows' variable now includes a 'created_at' field directly from monthly_data table.
-        Example row structure from Flask route:
-        rows = [
-          {
-            'id': 101,
-            'kpi_name': 'Fuel Efficiency',
-            'performance_month': 'Oct 2024',
-            'cumulative_performance': '87.2%',
-            'status': 'SUBMITTED',
-            'created_at': '2024-10-05 14:23:10'   <-- from monthly_data.created_at
-          },
-          ...
-        ]
-        In case 'created_at' is None or missing, we display 'N/A' gracefully.
-     #}
-     
      {% for row in rows %}
      <tr data-id="{{ row.id }}" data-status="{{ row.status }}">
-      <td>
-{% if row.status == 'SUBMITTED' %}
-<input type="checkbox"
-       class="kpi-checkbox"
-       value="{{ row.id }}">
-{% endif %}
-</td>
-
-<td class="sn-cell">{{ loop.index }}</td>
-      <td><span style="font-weight:600;">{{ row.kpi_name }}</span></td>
-      <td><span class="perf-val">{{ row.performance_month }}</span></td>
-      <td><span class="perf-val">{{ row.cumulative_performance }}</span></td>
+       <td class="text-center">
+        {% if row.status == 'SUBMITTED' %}
+         <input type="checkbox" class="kpi-checkbox" value="{{ row.id }}">
+        {% endif %}
+       </td>
+       <td class="sn-cell">{{ loop.index }}</td>
+       <td><span style="font-weight:600;">{{ row.kpi_name }}</span></td>
+       <td><span class="perf-val">{{ row.performance_month }}</span></td>
+       <td><span class="perf-val">{{ row.cumulative_performance }}</span></td>
        
-       <!-- Submission Date Column (monthly_data.created_at) -->
+       <!-- Submission Date Column - Fixed datetime handling -->
        <td class="submission-date-cell">
         {% if row.created_at %}
-          {% set created_str = row.created_at %}
-          {# Format datetime if it's a string like '2024-10-05 14:23:10' #}
-          {% if ' ' in created_str %}
-            {% set date_part = created_str.split(' ')[0] %}
-            {% set time_part = created_str.split(' ')[1] %}
-            {% set formatted_time = time_part[:5] if time_part else '' %}
+          {% if row.created_at is string %}
+            {# If it's already a string #}
+            {% set date_part = row.created_at.split(' ')[0] if ' ' in row.created_at else row.created_at %}
+            {% set time_part = row.created_at.split(' ')[1] if ' ' in row.created_at else '' %}
             <span class="submission-date">
               <i class="far fa-calendar-alt"></i> {{ date_part }}
-              <i class="far fa-clock ms-1"></i> {{ formatted_time }}
+              {% if time_part %}
+                <i class="far fa-clock ms-1"></i> {{ time_part[:5] }}
+              {% endif %}
             </span>
           {% else %}
+            {# If it's a datetime object #}
             <span class="submission-date">
-              <i class="far fa-calendar-alt"></i> {{ created_str }}
+              <i class="far fa-calendar-alt"></i> {{ row.created_at.strftime('%Y-%m-%d') }}
+              <i class="far fa-clock ms-1"></i> {{ row.created_at.strftime('%H:%M') }}
             </span>
           {% endif %}
         {% else %}
@@ -475,7 +535,7 @@
             <i class="far fa-calendar-times"></i> Not recorded
           </span>
         {% endif %}
-       </td>
+        </td>
        
        <td class="status-cell">
        {% if row.status == 'SUBMITTED' %}
@@ -484,32 +544,56 @@
         <span class="badge-status badge-approved"><i class="fas fa-check-circle"></i>{{ row.status }}</span>
        {% elif row.status == 'RETURNED' %}
         <span class="badge-status badge-returned"><i class="fas fa-undo"></i>{{ row.status }}</span>
-       {% elif row.status == 'FORWARDED' %}
-        <span class="badge-status badge-forwarded"><i class="fas fa-share"></i>{{ row.status }}</span>
+       {% elif row.status == 'FORWARDED_TO_ADRM' %}
+        <span class="badge-status badge-forwarded"><i class="fas fa-share"></i>FORWARDED</span>
+       {% elif row.status == 'FORWARDED_TO_DRM' %}
+        <span class="badge-status badge-forwarded"><i class="fas fa-share"></i>FORWARDED TO DRM</span>
        {% elif row.status == 'FROZEN' %}
         <span class="badge-status badge-frozen"><i class="fas fa-lock"></i>{{ row.status }}</span>
        {% else %}
         <span class="badge-status badge-default">{{ row.status }}</span>
        {% endif %}
-       </td>
-      
-      </tr>
+        </td>
+       
+       <td class="action-cell">
+        <div class="d-flex gap-2">
+         {% if row.status == 'SUBMITTED' %}
+          <a href="/approve/{{ row.id }}" class="btn-approve" data-kpiname="{{ row.kpi_name }}">
+           <i class="fas fa-check"></i> Approve
+          </a>
+          <a href="/return/{{ row.id }}" class="btn-return" data-kpiname="{{ row.kpi_name }}">
+           <i class="fas fa-undo"></i> Return
+          </a>
+         {% else %}
+          <button class="btn-approve" disabled style="opacity:0.5; cursor:not-allowed;">
+           <i class="fas fa-check"></i> Approve
+          </button>
+          <button class="btn-return" disabled style="opacity:0.5; cursor:not-allowed;">
+           <i class="fas fa-undo"></i> Return
+          </button>
+         {% endif %}
+        </div>
+        </td>
+       </tr>
      {% else %}
-     <!-- No rows fallback -->
-     <tr>
-      <td colspan="7" style="text-align:center; padding: 2rem 1rem; color:#5c6b7a;">
-       <i class="fas fa-inbox fa-2x mb-2 d-block" style="color:#cdd8e3;"></i>
-       No KPI submissions pending. All records are up to date.
-      </td>
-      </tr>
+      <tr>
+       <td colspan="8" style="text-align:center; padding: 2rem 1rem; color:#5c6b7a;">
+        <i class="fas fa-inbox fa-2x mb-2 d-block" style="color:#cdd8e3;"></i>
+        No KPI submissions found for {{ selected_month }} {{ selected_year }}.
+        <br>
+        <small>All records for this period are up to date or no data submitted.</small>
+        </td>
+       </tr>
      {% endfor %}
- 
     </tbody>
     <tfoot>
      <tr>
-      <td colspan="7">
+      <td colspan="8">
        <i class="fas fa-info-circle me-1"></i>
-       Palakkad Division &nbsp;|&nbsp; Southern Railway &nbsp;|&nbsp; Government of India &nbsp;|&nbsp; <i class="far fa-calendar-check"></i> Submission date derived from <strong>monthly_data.created_at</strong>
+       Palakkad Division &nbsp;|&nbsp; Southern Railway &nbsp;|&nbsp; Government of India &nbsp;|&nbsp; 
+       <i class="far fa-calendar-check"></i> Submission date derived from <strong>monthly_data.created_at</strong>
+       <br>
+       <small class="text-muted">Showing data for <strong>{{ selected_month }} {{ selected_year }}</strong></small>
        </td>
       </tr>
     </tfoot>
@@ -541,16 +625,13 @@
      });
    }
 
-
-   
    // Confirmations for Approve actions
-   const approveBtns = document.querySelectorAll('.btn-approve');
+   const approveBtns = document.querySelectorAll('.btn-approve:not([disabled])');
    approveBtns.forEach(btn => {
-     // Avoid attaching duplicate events if already attached
      btn.removeEventListener('click', window._approveHandler);
      function approveHandler(e) {
        const kpiName = this.getAttribute('data-kpiname') || 
-                      (this.closest('tr')?.querySelector('td:nth-child(2) span')?.innerText || 'this KPI');
+                      (this.closest('tr')?.querySelector('td:nth-child(3) span')?.innerText || 'this KPI');
        const confirmApprove = confirm(`Approve "${kpiName}"?\n\nOnce approved, it will be forwarded to Nodal Officer.`);
        if (!confirmApprove) {
          e.preventDefault();
@@ -559,18 +640,17 @@
      btn.addEventListener('click', approveHandler);
      window._approveHandler = approveHandler;
    });
+   
    // Select All Checkboxes
-document.getElementById("selectAll")?.addEventListener("change", function() {
+   document.getElementById("selectAll")?.addEventListener("change", function() {
     document.querySelectorAll(".kpi-checkbox").forEach(cb => {
         cb.checked = this.checked;
     });
-});
+   });
 
-// Bulk Approve
-document.getElementById("approveSelectedBtn")?.addEventListener("click", function() {
-
+   // Bulk Approve
+   document.getElementById("approveSelectedBtn")?.addEventListener("click", function() {
     const ids = [];
-
     document.querySelectorAll(".kpi-checkbox:checked").forEach(cb => {
         ids.push(cb.value);
     });
@@ -589,9 +669,7 @@ document.getElementById("approveSelectedBtn")?.addEventListener("click", functio
         headers: {
             "Content-Type":"application/json"
         },
-        body: JSON.stringify({
-            ids: ids
-        })
+        body: JSON.stringify({ ids: ids })
     })
     .then(response => response.json())
     .then(data => {
@@ -602,32 +680,24 @@ document.getElementById("approveSelectedBtn")?.addEventListener("click", functio
         console.error(error);
         alert("Approval failed");
     });
+   });
 
-});
-   // Confirmations for Return actions - prompt with optional remarks
-   const returnBtns = document.querySelectorAll('.btn-return');
+   // Confirmations for Return actions
+   const returnBtns = document.querySelectorAll('.btn-return:not([disabled])');
    returnBtns.forEach(btn => {
      btn.removeEventListener('click', window._returnHandler);
      function returnHandler(e) {
        const kpiName = this.getAttribute('data-kpiname') || 
-                      (this.closest('tr')?.querySelector('td:nth-child(2) span')?.innerText || 'this KPI');
+                      (this.closest('tr')?.querySelector('td:nth-child(3) span')?.innerText || 'this KPI');
        let remarks = prompt(`Return "${kpiName}" to department for revision.\n\nPlease provide remarks (optional):`, 'Needs revision/clarification');
-       // remarks can be passed via URL parameter if needed (frontend may append to return URL)
+       
        if (remarks === null) {
          e.preventDefault();
-       } else if (remarks !== null) {
-         // If remarks is provided, we can optionally append as query param for backend.
-         // But the original href points to /return/<id>.
-         // Dynamically add ?remarks= if needed (non-destructive)
+       } else if (remarks !== null && remarks.trim() !== '') {
          const originalHref = this.getAttribute('href');
-         if (originalHref && remarks.trim() !== '') {
-           const encodedRemarks = encodeURIComponent(remarks.trim());
-           const separator = originalHref.includes('?') ? '&' : '?';
-           this.setAttribute('href', originalHref + separator + 'remarks=' + encodedRemarks);
-         } else if (remarks !== null && remarks.trim() === '') {
-           // still proceed without remarks param
-           // keep original href
-         }
+         const encodedRemarks = encodeURIComponent(remarks.trim());
+         const separator = originalHref.includes('?') ? '&' : '?';
+         this.setAttribute('href', originalHref + separator + 'remarks=' + encodedRemarks);
        }
      }
 
@@ -635,8 +705,7 @@ document.getElementById("approveSelectedBtn")?.addEventListener("click", functio
      window._returnHandler = returnHandler;
    });
    
-   // Additional tooltip or info about created_at column
-   console.log('HOD Review Dashboard — Submission date column integrated using monthly_data.created_at');
+   console.log('HOD Review Dashboard — Filter by Month/Year enabled');
  })();
 </script>
 </body>

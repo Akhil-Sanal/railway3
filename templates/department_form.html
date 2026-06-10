@@ -111,7 +111,7 @@
  white-space: nowrap;
  text-align: center;
  }
- .kpi-table thead th:nth-child(3) { text-align: left; }
+ .kpi-table thead th:nth-child(2) { text-align: left; }
  .kpi-table tbody tr {
  border-bottom: 1px solid #edf1f6;
  transition: background .12s;
@@ -121,9 +121,9 @@
  padding: .65rem .9rem;
  vertical-align: middle;
  text-align: center;
-  border: 1px solid #d6dee8;
+ border: 1px solid #d6dee8;
  }
- .kpi-table tbody td:nth-child(3) { text-align: left; }
+ .kpi-table tbody td:nth-child(2) { text-align: left; }
  .kpi-table tfoot td {
  background: #f7f9fc;
  font-size: .72rem; color: #5c6b7a;
@@ -142,7 +142,7 @@
  padding: .2rem .55rem;
  white-space: nowrap;
  }
- .kpi-name-cell { font-weight: 600; color: #1a2a3a; }
+ .kpi-name-cell { font-weight: 600; color: #1a2a3a; text-align: left !important; padding-left: 20px !important; }
  .unit-cell { color: #5c6b7a; font-size: .78rem; }
  .target-cell { font-weight: 700; color: var(--rly-blue); }
  
@@ -247,35 +247,25 @@
     border:1px solid #d4a017 !important;
     text-align:center !important;
     width:100%;
-}
-
-.kpi-name-cell{
-    font-weight:600;
-    color: #1a2a3a;
-    text-align: left !important;
-    padding-left: 20px !important;
-}
-
-.kpi-table tbody tr:hover{
-    background:#f7f9fc;
-}
+ }
+ 
  .site-footer p { font-size: .68rem; color: rgba(255,255,255,.65); margin: 0; }
  .site-footer .gov { font-size: .65rem; color: var(--rly-gold); font-weight: 600; }
  .user-info{
     margin-left:auto;
     text-align:right;
     color:white;
-}
+ }
 
-.user-info .welcome{
+ .user-info .welcome{
     font-size:14px;
     font-weight:700;
-}
+ }
 
-.user-info .empid{
+ .user-info .empid{
     font-size:12px;
     color:#d4a017;
-}
+ }
  </style>
 </head>
 <body>
@@ -306,51 +296,14 @@
     <div class="welcome">
         Welcome, {{ session.username }}
     </div>
-
     <div class="empid">
         Employee ID : {{ session.user_id }}
     </div>
-</div>
+ </div>
 </nav>
- <div class="row mb-3">
-
-    <div class="col-md-3">
-        <label class="form-label">Month</label>
-
-        <select name="month" class="form-select">
-
-            <option value="JUNE">JUNE</option>
-            <option value="JULY">JULY</option>
-            <option value="AUGUST">AUGUST</option>
-            <option value="SEPTEMBER">SEPTEMBER</option>
-            <option value="OCTOBER">OCTOBER</option>
-            <option value="NOVEMBER">NOVEMBER</option>
-            <option value="DECEMBER">DECEMBER</option>
-            <option value="JANUARY">JANUARY</option>
-            <option value="FEBRUARY">FEBRUARY</option>
-            <option value="MARCH">MARCH</option>
-            <option value="APRIL">APRIL</option>
-            <option value="MAY">MAY</option>    
-
-        </select>
-    </div>
-
-    <div class="col-md-3">
-        <label class="form-label">Year</label>
-
-        <select name="year" class="form-select">
-
-            {% for y in range(2026,2037) %}
-                <option value="{{ y }}">{{ y }}</option>
-            {% endfor %}
-
-        </select>
-    </div>
-
-</div>
+ 
 <!-- ══ PAGE WRAPPER ════════════════════════════════════════ -->
 <div class="page-wrapper">
-
 
  <!-- Breadcrumb -->
  <div class="breadcrumb-bar">
@@ -370,17 +323,46 @@
  <p>Enter monthly and cumulative performance data for your department KPIs</p>
  </div>
  </div>
- 
 
-{% if success %}
-<div class="alert alert-success alert-dismissible fade show mb-3">
+<!-- Alert Messages -->
+{% if message %}
+<div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
     <i class="fas fa-check-circle me-2"></i>
-    KPI Data Submitted Successfully and forwarded to HOD.
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% endif %}
- <!-- Form -->
- <form method="POST">
+
+<!-- Form -->
+<form method="POST">
+<div class="row mb-3">
+    <div class="col-md-3">
+        <label class="form-label">Month</label>
+        <select name="month" class="form-select">
+            <option value="JUNE" {% if selected_month == 'JUNE' %}selected{% endif %}>JUNE</option>
+            <option value="JULY" {% if selected_month == 'JULY' %}selected{% endif %}>JULY</option>
+            <option value="AUGUST" {% if selected_month == 'AUGUST' %}selected{% endif %}>AUGUST</option>
+            <option value="SEPTEMBER" {% if selected_month == 'SEPTEMBER' %}selected{% endif %}>SEPTEMBER</option>
+            <option value="OCTOBER" {% if selected_month == 'OCTOBER' %}selected{% endif %}>OCTOBER</option>
+            <option value="NOVEMBER" {% if selected_month == 'NOVEMBER' %}selected{% endif %}>NOVEMBER</option>
+            <option value="DECEMBER" {% if selected_month == 'DECEMBER' %}selected{% endif %}>DECEMBER</option>
+            <option value="JANUARY" {% if selected_month == 'JANUARY' %}selected{% endif %}>JANUARY</option>
+            <option value="FEBRUARY" {% if selected_month == 'FEBRUARY' %}selected{% endif %}>FEBRUARY</option>
+            <option value="MARCH" {% if selected_month == 'MARCH' %}selected{% endif %}>MARCH</option>
+            <option value="APRIL" {% if selected_month == 'APRIL' %}selected{% endif %}>APRIL</option>
+            <option value="MAY" {% if selected_month == 'MAY' %}selected{% endif %}>MAY</option>    
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Year</label>
+        <select name="year" class="form-select">
+            {% for y in range(2026,2037) %}
+                <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
  
  <!-- Table card -->
  <div class="table-card">
@@ -401,136 +383,106 @@
     <th>Performance For Month</th>
     <th>Cumulative Performance upto the month</th>
     <th>Cumulative Performance of Previous Year</th>
-</tr>
+  </tr>
  </thead>
  <tbody>
  {% set current_section = namespace(value='') %}
  {% for kpi in kpis %}
-
-{% if current_section.value != kpi.section_name %}
-
-<tr class="section-header-row">
-    <td colspan="8">
-        {{ kpi.section_name }}
-    </td>
-</tr>
-
-{% set current_section.value = kpi.section_name %}
-
-{% endif %}
-
-<tr>
- <td class="sn-cell">{{ loop.index }}</td>
-
-<td class="kpi-name-cell">
-    {{ kpi.kpi_name }}
-</td>
-
-<td class="unit-cell">
-    {{ kpi.unit }}
-</td>
-
-<td class="target-cell">
-    {{ kpi.annual_target }}
-</td>
-
-<td>
-    <input
-        type="number"
-        step="0.01"
-        name="prev_{{ kpi.id }}"
-        value="{{ kpi.previous_year_value if kpi.previous_year_value else '' }}"
-        class="kpi-input"
-        placeholder="0.00"
-
-        {% if kpi.department_id|int != user_department|int %}
-        readonly
-        {% endif %}
-    >
-</td>
-<td>
-<input
-    type="number"
-    step="0.01"
-    name="month_{{ kpi.id }}"
-    value="{{ kpi.performance_month if kpi.performance_month else '' }}"
-    class="kpi-input"
-    placeholder="0.00"
-
-    {% if kpi.department_id|int != user_department|int %}
-    readonly
+    {% if current_section.value != kpi.section_name %}
+        <tr class="section-header-row">
+            <td colspan="8">
+                {{ kpi.section_name }}
+            </td>
+        </tr>
+        {% set current_section.value = kpi.section_name %}
     {% endif %}
     
->
- </td>
- <td>
- <input
-    type="number"
-    step="0.01"
-    name="cum_{{ kpi.id }}"
-    value="{{ kpi.cumulative_performance if kpi.cumulative_performance else '' }}"
-    class="kpi-input"
-    placeholder="0.00"
-
-    {% if kpi.department_id != user_department %}
-    readonly
-    {% endif %}
->
- </td>
-<td>
-<input
-    type="number"
-    step="0.01"
-    name="prev_cum_{{ kpi.id }}"
-    value="{{ kpi.previous_year_cumulative if kpi.previous_year_cumulative else '' }}"
-    class="kpi-input"
-    placeholder="0.00"
-
-    {% if kpi.department_id|int != user_department|int %}
-    readonly
-    {% endif %}
->
-</td>
- </tr>
+    <tr>
+        <td class="sn-cell">{{ loop.index }}</td>
+        <td class="kpi-name-cell">{{ kpi.kpi_name }}</td>
+        <td class="unit-cell">{{ kpi.unit }}</td>
+        <td class="target-cell">{{ kpi.annual_target }}</td>
+        <td>
+            <input
+                type="number"
+                step="0.01"
+                name="prev_{{ kpi.id }}"
+                value="{{ kpi.previous_year_value if kpi.previous_year_value else '' }}"
+                class="kpi-input"
+                placeholder="0.00"
+                {% if kpi.department_id|int != user_department|int %}
+                readonly
+                {% endif %}
+            >
+        </td>
+        <td>
+            <input
+                type="number"
+                step="0.01"
+                name="month_{{ kpi.id }}"
+                value="{{ kpi.performance_month if kpi.performance_month else '' }}"
+                class="kpi-input"
+                placeholder="0.00"
+                {% if kpi.department_id|int != user_department|int %}
+                readonly
+                {% endif %}
+            >
+        </td>
+        <td>
+            <input
+                type="number"
+                step="0.01"
+                name="cum_{{ kpi.id }}"
+                value="{{ kpi.cumulative_performance if kpi.cumulative_performance else '' }}"
+                class="kpi-input"
+                placeholder="0.00"
+                {% if kpi.department_id|int != user_department|int %}
+                readonly
+                {% endif %}
+            >
+        </td>
+        <td>
+            <input
+                type="number"
+                step="0.01"
+                name="prev_cum_{{ kpi.id }}"
+                value="{{ kpi.previous_year_cumulative if kpi.previous_year_cumulative else '' }}"
+                class="kpi-input"
+                placeholder="0.00"
+                {% if kpi.department_id|int != user_department|int %}
+                readonly
+                {% endif %}
+            >
+        </td>
+    </tr>
  {% endfor %}
- 
  </tbody>
  <tfoot>
  <tr>
- <td colspan="8">
- <i class="fas fa-info-circle me-1"></i>
- Palakkad Division &nbsp;|&nbsp; Southern Railway &nbsp;|&nbsp; Government of India
- </td>
- </tr>
+    <td colspan="8">
+        <i class="fas fa-info-circle me-1"></i>
+        Palakkad Division &nbsp;|&nbsp; Southern Railway &nbsp;|&nbsp; Government of India
+    </td>
+  </tr>
  </tfoot>
  </table>
  </div>
  
- <!-- Action buttons — inside form, names/values untouched -->
+ <!-- Action buttons -->
  <div class="btn-area">
- <button
- type="submit"
- name="action"
- value="draft"
- class="btn-draft">
- <i class="fas fa-save"></i>Save Draft
- </button>
- <button
- type="submit"
- name="action"
- value="submit"
- class="btn-submit">
- <i class="fas fa-paper-plane"></i>Submit To HOD
- </button>
- <span class="btn-hint">
- <i class="fas fa-info-circle me-1"></i>
- Save Draft to preserve data &nbsp;|&nbsp; Submit To HOD for final submission
- </span>
+    <button type="submit" name="action" value="draft" class="btn-draft">
+        <i class="fas fa-save"></i>Save Draft
+    </button>
+    <button type="submit" name="action" value="submit" class="btn-submit">
+        <i class="fas fa-paper-plane"></i>Submit To HOD
+    </button>
+    <span class="btn-hint">
+        <i class="fas fa-info-circle me-1"></i>
+        Save Draft to preserve data &nbsp;|&nbsp; Submit To HOD for final submission
+    </span>
  </div>
  </div>
- 
- </form>
- 
+</form>
 </div><!-- /page-wrapper -->
  
 <!-- ══ FOOTER ══════════════════════════════════════════════ -->
@@ -541,4 +493,4 @@
  
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 </body>
-</html> 
+</html>
