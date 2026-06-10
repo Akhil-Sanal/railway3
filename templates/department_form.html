@@ -15,6 +15,8 @@
  --rly-gold: #d4a017;
  --rly-bg: #eef2f7;
  --border: #cdd8e3;
+ --return-bg: #fff3cd;
+ --return-border: #ffc107;
  }
  
  body {
@@ -78,6 +80,118 @@
  color: var(--rly-blue); margin: 0;
  }
  .page-heading p { font-size: .78rem; color: #5c6b7a; margin: .2rem 0 0; }
+ 
+ /* ── RETURNED ITEMS SECTION ── */
+ .returned-section {
+ background: #fff;
+ border: 2px solid var(--return-border);
+ border-radius: 8px;
+ margin-bottom: 2rem;
+ overflow: hidden;
+ }
+ .returned-header {
+ background: var(--return-border);
+ padding: 1rem 1.5rem;
+ display: flex;
+ align-items: center;
+ gap: 0.75rem;
+ }
+ .returned-header i {
+ font-size: 1.5rem;
+ color: #856404;
+ }
+ .returned-header h5 {
+ margin: 0;
+ color: #856404;
+ font-weight: 700;
+ }
+ .returned-header p {
+ margin: 0;
+ color: #856404;
+ font-size: 0.8rem;
+ }
+ .returned-item {
+ border-bottom: 1px solid #f0f0f0;
+ padding: 1rem 1.5rem;
+ transition: background 0.2s;
+ }
+ .returned-item:hover {
+ background: #fffbf0;
+ }
+ .returned-item:last-child {
+ border-bottom: none;
+ }
+ .returned-kpi-name {
+ font-weight: 700;
+ color: var(--rly-blue);
+ font-size: 1rem;
+ }
+ .returned-remarks {
+ background: #f8f9fa;
+ border-left: 4px solid var(--return-border);
+ padding: 0.75rem;
+ margin-top: 0.5rem;
+ border-radius: 4px;
+ }
+ .returned-remarks i {
+ color: var(--return-border);
+ margin-right: 0.5rem;
+ }
+ .returned-remarks-text {
+ color: #856404;
+ font-style: italic;
+ margin-bottom: 0;
+ }
+ .badge-returned {
+ background: #fff3cd;
+ color: #856404;
+ padding: 0.25rem 0.75rem;
+ border-radius: 20px;
+ font-size: 0.7rem;
+ font-weight: 600;
+ display: inline-flex;
+ align-items: center;
+ gap: 0.3rem;
+ }
+ .btn-resubmit {
+ background: var(--rly-blue);
+ color: white;
+ border: none;
+ border-radius: 6px;
+ padding: 0.4rem 1rem;
+ font-size: 0.8rem;
+ font-weight: 600;
+ transition: all 0.2s;
+ text-decoration: none;
+ display: inline-flex;
+ align-items: center;
+ gap: 0.5rem;
+ }
+ .btn-resubmit:hover {
+ background: var(--rly-mid);
+ transform: translateY(-1px);
+ color: white;
+ }
+ .btn-remove-return {
+ background: #dc3545;
+ color: white;
+ border: none;
+ border-radius: 6px;
+ padding: 0.4rem 1rem;
+ font-size: 0.8rem;
+ font-weight: 600;
+ transition: all 0.2s;
+ text-decoration: none;
+ display: inline-flex;
+ align-items: center;
+ gap: 0.5rem;
+ cursor: pointer;
+ }
+ .btn-remove-return:hover {
+ background: #bb2d3b;
+ transform: translateY(-1px);
+ color: white;
+ }
  
  /* ── TABLE CARD ── */
  .table-card {
@@ -227,6 +341,11 @@
     box-shadow:none;
     border:1px solid #ced4da;
 }
+
+/* Warning row style */
+.table-warning {
+    background-color: #fff3cd !important;
+}
  
  /* ── FOOTER ── */
  .site-footer {
@@ -333,8 +452,66 @@
 </div>
 {% endif %}
 
+<!-- Returned Items Section -->
+{% if returned_kpis and returned_kpis|length > 0 %}
+<div class="returned-section mb-4">
+    <div class="returned-header">
+        <i class="fas fa-undo-alt"></i>
+        <div>
+            <h5 class="mb-0">Returned Applications Requiring Action</h5>
+            <p class="mb-0">Please review the HOD's remarks, update the data, and resubmit</p>
+        </div>
+    </div>
+    <div class="returned-items-list">
+        {% for returned in returned_kpis %}
+        <div class="returned-item" id="returned-item-{{ returned.id }}">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge-returned">
+                            <i class="fas fa-clock"></i> Returned for Revision
+                        </span>
+                        <span class="text-muted small">
+                            <i class="fas fa-calendar-alt"></i> {{ returned.month }} {{ returned.year }}
+                        </span>
+                    </div>
+                    <div class="returned-kpi-name">
+                        <i class="fas fa-chart-line me-2"></i>{{ returned.kpi_name }}
+                    </div>
+                    <div class="returned-remarks mt-2">
+                        <i class="fas fa-comment-dots"></i>
+                        <strong>Remarks from HOD:</strong>
+                        <p class="returned-remarks-text mt-1 mb-0">{{ returned.remarks or 'No specific remarks provided. Please review the data and resubmit.' }}</p>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> Current values - Monthly: {{ returned.performance_month or 'Not set' }}, 
+                            Cumulative: {{ returned.cumulative_performance or 'Not set' }}
+                        </small>
+                    </div>
+                </div>
+                <div class="ms-3 d-flex gap-2">
+                    <button class="btn-resubmit" onclick="scrollToKPI({{ returned.kpi_id }}, {{ returned.id }})">
+                        <i class="fas fa-edit me-1"></i> Review & Update
+                    </button>
+                    <button class="btn-remove-return" onclick="removeReturnedItem({{ returned.id }}, '{{ returned.kpi_name }}')">
+                        <i class="fas fa-trash-alt me-1"></i> Remove
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info mb-3" style="background: #e8f4fd; border-left: 4px solid #0d6efd;">
+    <i class="fas fa-info-circle me-2"></i>
+    No returned applications at this time. All your submissions are pending review or have been approved.
+</div>
+{% endif %}
+
 <!-- Form -->
-<form method="POST">
+<form method="POST" id="kpiForm">
 <div class="row mb-3">
     <div class="col-md-3">
         <label class="form-label">Month</label>
@@ -397,9 +574,16 @@
         {% set current_section.value = kpi.section_name %}
     {% endif %}
     
-    <tr>
+    <tr id="kpi-row-{{ kpi.id }}" {% if kpi.status == 'RETURNED' %}class="table-warning"{% endif %}>
         <td class="sn-cell">{{ loop.index }}</td>
-        <td class="kpi-name-cell">{{ kpi.kpi_name }}</td>
+        <td class="kpi-name-cell">
+            {{ kpi.kpi_name }}
+            {% if kpi.status == 'RETURNED' %}
+                <span class="badge-returned ms-2">
+                    <i class="fas fa-undo-alt"></i> Returned
+                </span>
+            {% endif %}
+        </td>
         <td class="unit-cell">{{ kpi.unit }}</td>
         <td class="target-cell">{{ kpi.annual_target }}</td>
         <td>
@@ -426,7 +610,16 @@
                 {% if kpi.department_id|int != user_department|int %}
                 readonly
                 {% endif %}
+                {% if kpi.status == 'RETURNED' %}
+                style="border-color: var(--return-border); background: #fffbf0;"
+                {% endif %}
             >
+            {% if kpi.status == 'RETURNED' and kpi.remarks %}
+            <small class="text-muted d-block mt-1">
+                <i class="fas fa-comment-dots text-warning"></i> 
+                <span class="text-warning" style="font-size: 0.7rem;">HOD Remarks: {{ kpi.remarks[:50] }}{% if kpi.remarks|length > 50 %}...{% endif %}</span>
+            </small>
+            {% endif %}
         </td>
         <td>
             <input
@@ -454,7 +647,7 @@
                 {% endif %}
             >
         </td>
-    </tr>
+      </tr>
  {% endfor %}
  </tbody>
  <tfoot>
@@ -462,10 +655,15 @@
     <td colspan="8">
         <i class="fas fa-info-circle me-1"></i>
         Palakkad Division &nbsp;|&nbsp; Southern Railway &nbsp;|&nbsp; Government of India
-    </td>
-  </tr>
- </tfoot>
- </table>
+        {% if returned_kpis and returned_kpis|length > 0 %}
+        <span class="ms-3 text-warning">
+            <i class="fas fa-exclamation-triangle"></i> 
+            {{ returned_kpis|length }} KPI(s) returned for revision
+        </span>
+        {% endif %}
+      </tr>
+    </tfoot>
+  </table>
  </div>
  
  <!-- Action buttons -->
@@ -492,5 +690,70 @@
 </footer>
  
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+// Function to scroll to a specific KPI row
+function scrollToKPI(kpiId, returnedId) {
+    const targetRow = document.getElementById(`kpi-row-${kpiId}`);
+    if (targetRow) {
+        targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetRow.style.transition = 'background-color 0.5s';
+        targetRow.style.backgroundColor = '#fff3cd';
+        setTimeout(() => {
+            targetRow.style.backgroundColor = '';
+        }, 3000);
+        
+        // Highlight the input field in the row
+        const monthInput = targetRow.querySelector('input[name^="month_"]');
+        if (monthInput) {
+            monthInput.focus();
+            monthInput.style.transition = 'border-color 0.3s';
+            monthInput.style.borderColor = '#ffc107';
+            monthInput.style.boxShadow = '0 0 0 3px rgba(255,193,7,0.2)';
+            setTimeout(() => {
+                monthInput.style.borderColor = '';
+                monthInput.style.boxShadow = '';
+            }, 3000);
+        }
+    }
+}
+
+// Function to remove a returned item
+function removeReturnedItem(returnId, kpiName) {
+    if (confirm(`Are you sure you want to remove the returned status for "${kpiName}"?\n\nThis will delete this entry and you will need to start fresh.`)) {
+        fetch(`/remove_return/${returnId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while removing the returned item.');
+        });
+    }
+}
+
+// Confirm before submit
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        const submitButton = e.submitter;
+        if (submitButton && submitButton.value === 'submit') {
+            const confirmMsg = confirm('Are you sure you want to submit these KPIs to HOD? Once submitted, you cannot modify until HOD returns them.');
+            if (!confirmMsg) {
+                e.preventDefault();
+            }
+        }
+    });
+});
+</script>
 </body>
 </html>
