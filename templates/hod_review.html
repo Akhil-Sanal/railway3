@@ -382,23 +382,41 @@
  
  <!-- Table card -->
  <div class="table-card">
-  <div class="table-card-header">
-   <i class="fas fa-table" style="color:var(--rly-gold);"></i>
-   <h6>KPI Records – Pending HOD Review <span style="font-size:0.7rem; font-weight:normal; margin-left:0.5rem;"><i class="fas fa-calendar-alt"></i> Submission date shown (created_at)</span></h6>
-  </div>
+  <div class="table-card-header d-flex justify-content-between align-items-center">
+
+    <div class="d-flex align-items-center gap-2">
+        <i class="fas fa-table" style="color:var(--rly-gold);"></i>
+
+        <h6 class="mb-0">
+            KPI Records – Pending HOD Review
+            <span style="font-size:0.7rem;font-weight:normal;margin-left:0.5rem;">
+                <i class="fas fa-calendar-alt"></i>
+                Submission date shown (created_at)
+            </span>
+        </h6>
+    </div>
+
+    <button id="approveSelectedBtn" class="btn-approve">
+        <i class="fas fa-check-circle"></i>
+        Approve Selected
+    </button>
+
+</div>
  
   <div class="table-responsive">
    <table class="kpi-table">
     <thead>
      <tr>
        <th>#</th>
-       <th><i class="fas fa-chart-bar me-1"></i>KPI</th>
+       <th>
+    <input type="checkbox" id="selectAll">
+</th>
+<th><i class="fas fa-chart-bar me-1"></i>KPI</th>
        <th><i class="fas fa-calendar-day me-1"></i>Monthly</th>
        <th><i class="fas fa-layer-group me-1"></i>Cumulative</th>
        <th><i class="fas fa-clock me-1"></i>Submitted On</th>
        <th><i class="fas fa-info-circle me-1"></i>Status</th>
-       <th><i class="fas fa-cogs me-1"></i>Action</th>
-      </tr>
+             </tr>
     </thead>
     <tbody>
  
@@ -421,7 +439,15 @@
      
      {% for row in rows %}
      <tr data-id="{{ row.id }}" data-status="{{ row.status }}">
-      <td class="sn-cell">{{ loop.index }}</td>
+      <td>
+{% if row.status == 'SUBMITTED' %}
+<input type="checkbox"
+       class="kpi-checkbox"
+       value="{{ row.id }}">
+{% endif %}
+</td>
+
+<td class="sn-cell">{{ loop.index }}</td>
       <td><span style="font-weight:600;">{{ row.kpi_name }}</span></td>
       <td><span class="perf-val">{{ row.performance_month }}</span></td>
       <td><span class="perf-val">{{ row.cumulative_performance }}</span></td>
@@ -466,39 +492,7 @@
         <span class="badge-status badge-default">{{ row.status }}</span>
        {% endif %}
        </td>
-      <td class="action-cell">
-       <div class="d-flex gap-2 flex-wrap">
-        {% if row.status == 'SUBMITTED' %}
-         <a href="/approve/{{ row.id }}" class="btn-approve" data-id="{{ row.id }}" data-kpiname="{{ row.kpi_name }}">
-          <i class="fas fa-check"></i>Approve
-         </a>
-         <a href="/return/{{ row.id }}" class="btn-return" data-id="{{ row.id }}" data-kpiname="{{ row.kpi_name }}">
-          <i class="fas fa-undo"></i>Return
-         </a>
-        {% elif row.status == 'APPROVED' %}
-         <button class="btn-approve" disabled>
-          <i class="fas fa-check-circle"></i> Approved
-         </button>
-         <button class="btn-return" disabled>
-          <i class="fas fa-undo"></i> Return
-         </button>
-        {% elif row.status == 'RETURNED' %}
-         <button class="btn-approve" disabled>
-          <i class="fas fa-check"></i> Approve
-         </button>
-         <button class="btn-return" disabled>
-          <i class="fas fa-check-circle"></i> Returned
-         </button>
-        {% else %}
-         <button class="btn-approve" disabled>
-          <i class="fas fa-check"></i> Approve
-         </button>
-         <button class="btn-return" disabled>
-          <i class="fas fa-undo"></i> Return
-         </button>
-        {% endif %}
-       </div>
-       </td>
+      
       </tr>
      {% else %}
      <!-- No rows fallback -->
@@ -546,6 +540,8 @@
        return true;
      });
    }
+
+
    
    // Confirmations for Approve actions
    const approveBtns = document.querySelectorAll('.btn-approve');
@@ -563,7 +559,51 @@
      btn.addEventListener('click', approveHandler);
      window._approveHandler = approveHandler;
    });
-   
+   // Select All Checkboxes
+document.getElementById("selectAll")?.addEventListener("change", function() {
+    document.querySelectorAll(".kpi-checkbox").forEach(cb => {
+        cb.checked = this.checked;
+    });
+});
+
+// Bulk Approve
+document.getElementById("approveSelectedBtn")?.addEventListener("click", function() {
+
+    const ids = [];
+
+    document.querySelectorAll(".kpi-checkbox:checked").forEach(cb => {
+        ids.push(cb.value);
+    });
+
+    if(ids.length === 0){
+        alert("Select at least one KPI");
+        return;
+    }
+
+    if(!confirm(`Approve ${ids.length} KPI(s)?`)){
+        return;
+    }
+
+    fetch("/approve_bulk", {
+        method: "POST",
+        headers: {
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            ids: ids
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        location.reload();
+    })
+    .catch(error => {
+        console.error(error);
+        alert("Approval failed");
+    });
+
+});
    // Confirmations for Return actions - prompt with optional remarks
    const returnBtns = document.querySelectorAll('.btn-return');
    returnBtns.forEach(btn => {
@@ -590,6 +630,7 @@
          }
        }
      }
+
      btn.addEventListener('click', returnHandler);
      window._returnHandler = returnHandler;
    });

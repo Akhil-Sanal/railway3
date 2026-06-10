@@ -3,8 +3,8 @@ from flask import render_template
 from flask import request
 from flask import redirect
 from flask import session
+from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
-
 
 app = Flask(__name__)
 app.secret_key = "railway_secret"
@@ -397,49 +397,56 @@ def hod():
 
 @app.route("/approve/<int:id>")
 def approve(id):
-
     db.session.execute(
         db.text("""
             UPDATE monthly_data
             SET status = 'APPROVED'
             WHERE id = :id
         """),
-        {
-            "id": id
-        }
+        {"id": id}
     )
 
     db.session.commit()
 
     return redirect("/hod")
-@app.route("/return/<int:id>")
-def return_entry(id):
 
-    db.session.execute(
-        db.text("""
-            UPDATE monthly_data
-            SET status = 'RETURNED'
-            WHERE id = :id
-        """),
-        {
-            "id": id
-        }
-    )
+
+
+
+@app.route("/approve_bulk", methods=["POST"])
+def approve_bulk():
+
+    if "user_id" not in session:
+        return jsonify({"message": "Login Required"}), 401
+
+    if session["role"] != "LEVEL2":
+        return jsonify({"message": "Access Denied"}), 403
+
+    data = request.get_json()
+    ids = data.get("ids", [])
+
+    if not ids:
+        return jsonify({"message": "No KPI Selected"}), 400
+
+    for id in ids:
+        db.session.execute(
+            db.text("""
+                UPDATE monthly_data
+                SET status = 'APPROVED'
+                WHERE id = :id
+            """),
+            {"id": id}
+        )
 
     db.session.commit()
 
-    return redirect("/hod")
-@app.route("/submitted")
-def submitted():
-
-    return """
-    <h2>Submitted To HOD Successfully</h2>
-    <a href="/department">Back</a>
-    """
+    return jsonify({
+        "message": f"{len(ids)} KPI(s) Approved Successfully"
+    })
 @app.route("/nodal")
 def nodal():
 
-    if "user_id" not in session:
+    if "user_id" not in session :
         return redirect("/login")
 
     if session["role"] != "LEVEL3":
