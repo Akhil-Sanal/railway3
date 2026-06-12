@@ -362,6 +362,7 @@
             white-space: nowrap;
             transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
             margin-left: 8px;
+            cursor: pointer;
         }
         .btn-reject:hover {
             background: #991b1b;
@@ -530,28 +531,28 @@
         <div class="filter-group">
             <label><i class="fas fa-calendar"></i> Month:</label>
             <select id="filterMonth" name="month">
-                <option value="JANUARY">JANUARY</option>
-                <option value="FEBRUARY">FEBRUARY</option>
-                <option value="MARCH">MARCH</option>
-                <option value="APRIL">APRIL</option>
-                <option value="MAY">MAY</option>
-                <option value="JUNE" selected>JUNE</option>
-                <option value="JULY">JULY</option>
-                <option value="AUGUST">AUGUST</option>
-                <option value="SEPTEMBER">SEPTEMBER</option>
-                <option value="OCTOBER">OCTOBER</option>
-                <option value="NOVEMBER">NOVEMBER</option>
-                <option value="DECEMBER">DECEMBER</option>
+                <option value="JANUARY" {% if selected_month == 'JANUARY' %}selected{% endif %}>JANUARY</option>
+                <option value="FEBRUARY" {% if selected_month == 'FEBRUARY' %}selected{% endif %}>FEBRUARY</option>
+                <option value="MARCH" {% if selected_month == 'MARCH' %}selected{% endif %}>MARCH</option>
+                <option value="APRIL" {% if selected_month == 'APRIL' %}selected{% endif %}>APRIL</option>
+                <option value="MAY" {% if selected_month == 'MAY' %}selected{% endif %}>MAY</option>
+                <option value="JUNE" {% if selected_month == 'JUNE' %}selected{% endif %}>JUNE</option>
+                <option value="JULY" {% if selected_month == 'JULY' %}selected{% endif %}>JULY</option>
+                <option value="AUGUST" {% if selected_month == 'AUGUST' %}selected{% endif %}>AUGUST</option>
+                <option value="SEPTEMBER" {% if selected_month == 'SEPTEMBER' %}selected{% endif %}>SEPTEMBER</option>
+                <option value="OCTOBER" {% if selected_month == 'OCTOBER' %}selected{% endif %}>OCTOBER</option>
+                <option value="NOVEMBER" {% if selected_month == 'NOVEMBER' %}selected{% endif %}>NOVEMBER</option>
+                <option value="DECEMBER" {% if selected_month == 'DECEMBER' %}selected{% endif %}>DECEMBER</option>
             </select>
         </div>
         <div class="filter-group">
             <label><i class="fas fa-calendar-alt"></i> Year:</label>
             <select id="filterYear" name="year">
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-                <option value="2026" selected>2026</option>
-                <option value="2027">2027</option>
-                <option value="2028">2028</option>
+                <option value="2024" {% if selected_year == 2024 %}selected{% endif %}>2024</option>
+                <option value="2025" {% if selected_year == 2025 %}selected{% endif %}>2025</option>
+                <option value="2026" {% if selected_year == 2026 %}selected{% endif %}>2026</option>
+                <option value="2027" {% if selected_year == 2027 %}selected{% endif %}>2027</option>
+                <option value="2028" {% if selected_year == 2028 %}selected{% endif %}>2028</option>
             </select>
         </div>
         <button class="btn-apply-filter" onclick="applyFilter()">
@@ -585,7 +586,7 @@
                         <td><span class="perf-val">{{ row.performance_month }}</span></td>
                         <td><span class="perf-val">{{ row.cumulative_performance }}</span></td>
                         <td><span class="prev-year-val">{{ row.previous_year_value if row.previous_year_value else '-' }}</span></td>
-                        <td><span class="prev-year-val">{{ row.previous_year_cumulative if row.previous_year_cumulative else '-' }}</span></td>
+                        <td><span class="prev-year-val">{{ row.cumulative_performance_of_prev_year if row.cumulative_performance_of_prev_year else '-' }}</span></td>
                         <td class="status-cell">
                             {% if row.status == 'FORWARDED_TO_DRM' %}
                             <span class="badge-status status-FORWARDED_TO_DRM"><i class="fas fa-paper-plane"></i>FORWARDED_TO_DRM</span>
@@ -598,7 +599,7 @@
                             {% endif %}
                         </td>
                         <td class="action-cell">
-                            {% if row.status != 'FORWARDED_TO_DRM' and row.status != 'FROZEN' and row.status != 'RETURNED' %}
+                            {% if row.status == 'FORWARDED_TO_ADRM' %}
                                 <a href="/forward_to_drm/{{ row.id }}" class="btn-forward forward-action" data-id="{{ row.id }}" data-kpiname="{{ row.kpi_name }}">
                                     <i class="fa fa-paper-plane"></i> Forward to DRM
                                 </a>
@@ -658,10 +659,10 @@
                     </div>
                     <textarea id="returnRemarks" class="remark-textarea" rows="4" 
                         placeholder="Provide clear instructions for correction. E.g., 'Incorrect monthly figures, please update as per annexure.'"></textarea>
-                    <div class="form-text text-muted mt-1">These remarks will be visible to the employee for resubmission.</div>
+                    <div class="form-text text-muted mt-1">These remarks will be visible to the nodal officer for resubmission.</div>
                 </div>
                 <div class="alert alert-warning" role="alert" style="font-size:0.78rem; background:#fff8e7;">
-                    <i class="fas fa-info-circle"></i> After returning, the KPI status will change to <strong>RETURNED</strong>. Employee will be able to edit and resubmit the application.
+                    <i class="fas fa-info-circle"></i> After returning, the KPI status will change to <strong>RETURNED</strong>. Nodal officer will be able to edit and resubmit the application.
                 </div>
                 <input type="hidden" id="returnKpiId" value="">
                 <input type="hidden" id="returnKpiName" value="">
@@ -756,7 +757,7 @@
                 }
                 
                 if (!remarks) {
-                    alert('Please provide remarks/reason for returning the application. Employee requires clarification.');
+                    alert('Please provide remarks/reason for returning the application. Nodal officer requires clarification.');
                     return;
                 }
                 
@@ -765,21 +766,21 @@
                 confirmReturnBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
                 
                 try {
-                    const response = await fetch(`/return_kpi/${kpiId}`, {
+                    const response = await fetch(`/return_kpi_to_nodal/${kpiId}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-Requested-With': 'XMLHttpRequest'
                         },
-                        body: JSON.stringify({ remarks: remarks, status: 'RETURNED' })
+                        body: JSON.stringify({ remarks: remarks })
                     });
                     
                     let result;
                     if (response.ok) {
                         result = await response.json();
                     } else {
-                        console.warn("Backend endpoint returned error, performing optimistic UI update.");
-                        result = { success: true, message: "Application returned successfully (simulated)." };
+                        console.warn("Backend endpoint returned error");
+                        result = { success: false, message: "Server error occurred" };
                     }
                     
                     if (result && result.success) {
@@ -806,37 +807,18 @@
                             // Update data-status attribute
                             targetRow.setAttribute('data-status', 'RETURNED');
                         }
-                        alert(`✅ Application "${kpiNameDisplay || 'KPI'}" has been returned to employee with remarks:\n"${remarks}"\n\nEmployee can now view the returned application and resubmit after corrections.`);
+                        alert(`✅ Application "${kpiNameDisplay || 'KPI'}" has been returned to Nodal Officer with remarks:\n"${remarks}"\n\nNodal Officer can now view the returned application and resubmit after corrections.`);
                         if (returnModal) returnModal.hide();
+                        // Reload the page to refresh the list
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
                     } else {
                         alert('Return failed: ' + (result?.message || 'Please try again.'));
                     }
                 } catch (err) {
                     console.error('Return API error:', err);
-                    const userConfirm = confirm(`Unable to connect to server. However, do you want to mark as RETURNED locally? (Employee will see returned status)\nRemarks: ${remarks}`);
-                    if (userConfirm) {
-                        const targetRow = document.querySelector(`tr[data-id="${kpiId}"]`);
-                        if (targetRow) {
-                            const statusCell = targetRow.querySelector('.status-cell');
-                            if (statusCell) {
-                                statusCell.innerHTML = `<span class="badge-status status-RETURNED"><i class="fas fa-undo-alt"></i>RETURNED</span>`;
-                            }
-                            const actionCell = targetRow.querySelector('.action-cell');
-                            if (actionCell) {
-                                actionCell.innerHTML = `
-                                    <button class="btn-forward" disabled style="background:#9ca3af;">
-                                        <i class="fa fa-clock"></i> Awaiting Resubmission
-                                    </button>
-                                    <button class="btn-reject" disabled>
-                                        <i class="fa fa-undo"></i> Already Returned
-                                    </button>
-                                `;
-                            }
-                            targetRow.setAttribute('data-status', 'RETURNED');
-                        }
-                        alert(`Application returned (offline sync). Employee will see the application with status RETURNED and your remarks:\n"${remarks}"`);
-                        if (returnModal) returnModal.hide();
-                    }
+                    alert('Unable to connect to server. Please check your connection and try again.');
                 } finally {
                     confirmReturnBtn.disabled = false;
                     confirmReturnBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Confirm Return';
@@ -857,7 +839,7 @@
             });
         }
         
-        console.log('ADRM Dashboard ready — Return (Reject) button integrated, employees will see returned applications.');
+        console.log('ADRM Dashboard ready — Return (Reject) button integrated, nodal officers will see returned applications.');
     })();
     
     // Apply filter function - redirects to adrm page with selected month/year

@@ -119,7 +119,7 @@
  
         /* ── PAGE WRAPPER ── */
         .page-wrapper {
-            max-width: 1100px;
+            max-width: 1300px;
             margin: 0 auto;
             padding: 1.6rem 1.2rem 2rem;
         }
@@ -151,6 +151,56 @@
         .page-sub {
             font-size: 0.8rem; color: #6b7a9c;
             margin-bottom: 1.6rem;
+        }
+ 
+        /* ── MONTH/YEAR FILTER ── */
+        .filter-bar {
+            background: #fff;
+            border: 1px solid #d6dfee;
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .filter-group label {
+            font-weight: 600;
+            color: var(--railway-blue);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+        .filter-group select {
+            padding: 0.4rem 0.8rem;
+            border-radius: 5px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.85rem;
+            background: white;
+            cursor: pointer;
+        }
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+        .btn-apply-filter {
+            background: var(--railway-blue);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-apply-filter:hover {
+            background: var(--railway-blue-dark);
         }
  
         /* ── TABLE CARD ── */
@@ -221,17 +271,61 @@
         .status-APPROVED::before   { background:#38a169; }
         .status-RETURNED   { background:#fff5f5; color:#9b2c2c; border:1px solid #fed7d7; }
         .status-RETURNED::before   { background:#e53e3e; }
-        .status-FORWARDED  { background:#ebf8ff; color:#1a5f8a; border:1px solid #bee3f8; }
-        .status-FORWARDED::before  { background:#3182ce; }
+        .status-FORWARDED_TO_DRM  { background:#ebf8ff; color:#1a5f8a; border:1px solid #bee3f8; }
+        .status-FORWARDED_TO_DRM::before  { background:#3182ce; }
         .status-FROZEN     { background:#f7fafc; color:#4a5568; border:1px solid #cbd5e0; }
         .status-FROZEN::before     { background:#718096; }
         .status-PENDING    { background:#fffbea; color:#975a16; border:1px solid #fbd38d; }
         .status-PENDING::before    { background:#d69e2e; }
-        /* Status for ADRM submission to DRM */
-        .status-SUBMITTED_BY_ADRM { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
-        .status-SUBMITTED_BY_ADRM::before { background:#f59e0b; }
  
-        /* ── FREEZE BUTTON ── */
+        /* ── BUTTONS ── */
+        .btn-approve {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #28a745; color: #fff;
+            border: none; border-radius: 5px;
+            padding: 6px 13px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+            cursor: pointer;
+        }
+        .btn-approve:hover {
+            background: #218838;
+            box-shadow: 0 3px 10px rgba(40,167,69,0.3);
+            transform: translateY(-1px);
+        }
+        .btn-approve:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .btn-reject {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #dc3545; color: #fff;
+            border: none; border-radius: 5px;
+            padding: 6px 13px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+        .btn-reject:hover {
+            background: #c82333;
+            box-shadow: 0 3px 10px rgba(220,53,69,0.3);
+            transform: translateY(-1px);
+        }
+        .btn-reject:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
         .btn-freeze {
             display: inline-flex; align-items: center; gap: 6px;
             background: #4a5568; color: #fff;
@@ -255,6 +349,59 @@
             opacity: 0.7;
         }
         .btn-freeze i { font-size: 0.74rem; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        /* Return Form Modal Styles */
+        .return-form-modal .modal-content {
+            border-radius: 12px;
+            border: 2px solid var(--gold);
+        }
+        .return-form-modal .modal-header {
+            background: var(--railway-blue);
+            color: white;
+            border-bottom: 2px solid var(--gold);
+            border-radius: 10px 10px 0 0;
+        }
+        .return-form-modal .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+        .return-form-modal .modal-title {
+            font-family: 'Noto Serif', serif;
+            font-weight: 600;
+        }
+        .remark-label {
+            font-weight: 600;
+            color: var(--railway-blue);
+            margin-bottom: 8px;
+        }
+        .remark-textarea {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px;
+            width: 100%;
+            font-size: 0.85rem;
+        }
+        .remark-textarea:focus {
+            border-color: var(--gold);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(212,160,23,0.2);
+        }
+        .modal-footer .btn-submit-return {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 6px;
+        }
+        .modal-footer .btn-submit-return:hover {
+            background: #c82333;
+        }
  
         /* ── FOOTER ── */
         .ir-footer {
@@ -292,6 +439,20 @@
             }
             body {
                 padding-top: 85px;
+            }
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-group {
+                justify-content: space-between;
+            }
+            .action-buttons {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .btn-reject {
+                margin-left: 0;
             }
         }
     </style>
@@ -345,7 +506,41 @@
         <i class="fa fa-tachometer-alt" style="color:var(--gold);margin-right:8px;font-size:1.2rem;"></i>
         DRM Dashboard
     </div>
-    <div class="page-sub">Division Performance Monitoring &mdash; Final Review &amp; Month Freeze</div>
+    <div class="page-sub">Division Performance Monitoring &mdash; Final Review, Approve/Reject &amp; Month Freeze</div>
+ 
+    <!-- Month/Year Filter -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label><i class="fas fa-calendar"></i> Month:</label>
+            <select id="filterMonth" name="month">
+                <option value="JANUARY">JANUARY</option>
+                <option value="FEBRUARY">FEBRUARY</option>
+                <option value="MARCH">MARCH</option>
+                <option value="APRIL">APRIL</option>
+                <option value="MAY">MAY</option>
+                <option value="JUNE" selected>JUNE</option>
+                <option value="JULY">JULY</option>
+                <option value="AUGUST">AUGUST</option>
+                <option value="SEPTEMBER">SEPTEMBER</option>
+                <option value="OCTOBER">OCTOBER</option>
+                <option value="NOVEMBER">NOVEMBER</option>
+                <option value="DECEMBER">DECEMBER</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label><i class="fas fa-calendar-alt"></i> Year:</label>
+            <select id="filterYear" name="year">
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+            </select>
+        </div>
+        <button class="btn-apply-filter" onclick="applyFilter()">
+            <i class="fas fa-search"></i> Apply Filter
+        </button>
+    </div>
  
     <!-- Table Card -->
     <div class="table-card">
@@ -368,31 +563,50 @@
                 <tbody>
  
                     {% for row in rows %}
-                    <tr data-id="{{ row.id }}">
+                    <tr data-id="{{ row.id }}" data-status="{{ row.status }}">
                         <td class="kpi-name">{{ row.kpi_name }}</td>
                         <td><span class="perf-val">{{ row.performance_month }}</span></td>
                         <td><span class="perf-val">{{ row.cumulative_performance }}</span></td>
                         <td class="status-cell">
-                            {% if row.status == 'SUBMITTED_BY_ADRM' %}
-                            <span class="badge-status status-SUBMITTED_BY_ADRM"><i class="fas fa-paper-plane"></i>SUBMITTED_BY_ADRM</span>
+                            {% if row.status == 'FORWARDED_TO_DRM' %}
+                            <span class="badge-status status-FORWARDED_TO_DRM"><i class="fas fa-paper-plane"></i>FORWARDED_TO_DRM</span>
+                            {% elif row.status == 'FROZEN' %}
+                            <span class="badge-status status-FROZEN"><i class="fas fa-lock"></i>FROZEN</span>
+                            {% elif row.status == 'RETURNED' %}
+                            <span class="badge-status status-RETURNED"><i class="fas fa-undo-alt"></i>RETURNED</span>
                             {% else %}
                             <span class="badge-status status-{{ row.status }}">{{ row.status }}</span>
                             {% endif %}
                         </td>
                         <td class="action-cell">
-                            {% if row.status == 'SUBMITTED_BY_ADRM' %}
-                            <a href="/freeze/{{ row.id }}" class="btn-freeze" data-id="{{ row.id }}" data-kpiname="{{ row.kpi_name }}">
-                                <i class="fa fa-snowflake"></i> Freeze Month
-                            </a>
-                            {% elif row.status == 'FROZEN' %}
-                            <button class="btn-freeze" disabled style="background:#28a745;">
-                                <i class="fa fa-check-circle"></i> Frozen
-                            </button>
-                            {% else %}
-                            <button class="btn-freeze" disabled style="background:#6c757d;">
-                                <i class="fa fa-hourglass-half"></i> Pending ADRM
-                            </button>
-                            {% endif %}
+                            <div class="action-buttons">
+                                {% if row.status == 'FORWARDED_TO_DRM' %}
+                                    <!-- Approve Button -->
+                                    <a href="/approve_kpi/{{ row.id }}" class="btn-approve approve-action" data-id="{{ row.id }}" data-kpiname="{{ row.kpi_name }}">
+                                        <i class="fa fa-check-circle"></i> Approve
+                                    </a>
+                                    <!-- Reject Button triggers return form modal -->
+                                    <button type="button" class="btn-reject reject-open-modal" 
+                                        data-id="{{ row.id }}" 
+                                        data-kpiname="{{ row.kpi_name }}"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#returnApplicationModal">
+                                        <i class="fa fa-times-circle"></i> Reject
+                                    </button>
+                                {% elif row.status == 'FROZEN' %}
+                                    <button class="btn-freeze" disabled style="background:#28a745;">
+                                        <i class="fa fa-check-circle"></i> Frozen
+                                    </button>
+                                {% elif row.status == 'RETURNED' %}
+                                    <button class="btn-reject" disabled style="background:#9ca3af;">
+                                        <i class="fa fa-undo"></i> Returned to ADRM
+                                    </button>
+                                {% else %}
+                                    <button class="btn-approve" disabled style="background:#6c757d;">
+                                        <i class="fa fa-hourglass-half"></i> Pending ADRM
+                                    </button>
+                                {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -402,6 +616,41 @@
         </div>
     </div>
  
+</div>
+
+<!-- RETURN APPLICATION MODAL (Return Form) -->
+<div class="modal fade return-form-modal" id="returnApplicationModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="returnModalLabel">
+                    <i class="fas fa-undo-alt me-2"></i> Return Application for Correction
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div class="remark-label">
+                        <i class="fas fa-edit me-1"></i> Remarks / Reason for Return:
+                    </div>
+                    <textarea id="returnRemarks" class="remark-textarea" rows="4" 
+                        placeholder="Provide clear instructions for correction. E.g., 'Incorrect monthly figures, please update as per annexure.'"></textarea>
+                    <div class="form-text text-muted mt-1">These remarks will be visible to ADRM officer for resubmission.</div>
+                </div>
+                <div class="alert alert-warning" role="alert" style="font-size:0.78rem; background:#fff8e7;">
+                    <i class="fas fa-info-circle"></i> After returning, the KPI status will change to <strong>RETURNED</strong>. ADRM officer will be able to edit and resubmit the application.
+                </div>
+                <input type="hidden" id="returnKpiId" value="">
+                <input type="hidden" id="returnKpiName" value="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-submit-return" id="confirmReturnBtn">
+                    <i class="fas fa-paper-plane"></i> Confirm Return
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
  
 <!-- FOOTER -->
@@ -428,21 +677,150 @@
             });
         }
         
-        // Confirm freeze action before proceeding
-        const freezeButtons = document.querySelectorAll('.btn-freeze');
-        freezeButtons.forEach(btn => {
+        // Approve confirmation
+        const approveButtons = document.querySelectorAll('.approve-action');
+        approveButtons.forEach(btn => {
             btn.addEventListener('click', function(e) {
                 const kpiName = this.getAttribute('data-kpiname') || 
                                (this.closest('tr')?.querySelector('.kpi-name')?.innerText || 'this KPI');
-                const confirmFreeze = confirm(`Freeze "${kpiName}"?\n\nFreezing the month will lock all KPI data for this period. This action cannot be undone. Continue?`);
-                if (!confirmFreeze) {
+                const confirmApprove = confirm(`Approve "${kpiName}"?\n\nApproving will freeze the KPI data for this month. This action cannot be undone. Continue?`);
+                if (!confirmApprove) {
                     e.preventDefault();
                 }
             });
         });
         
-        console.log('DRM Dashboard ready — Logo integrated, Logout and freeze confirmations active.');
+        // Global variables for modal
+        let currentReturnId = null;
+        let currentReturnKpiName = null;
+        const returnModalElem = document.getElementById('returnApplicationModal');
+        let returnModal = null;
+        if (returnModalElem) {
+            returnModal = new bootstrap.Modal(returnModalElem);
+        }
+        
+        // Collect all reject/open-modal buttons
+        const rejectButtons = document.querySelectorAll('.reject-open-modal');
+        rejectButtons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const kpiId = this.getAttribute('data-id');
+                const kpiName = this.getAttribute('data-kpiname');
+                if (kpiId) {
+                    document.getElementById('returnKpiId').value = kpiId;
+                    document.getElementById('returnKpiName').value = kpiName;
+                    currentReturnId = kpiId;
+                    currentReturnKpiName = kpiName;
+                    // Clear previous remarks
+                    document.getElementById('returnRemarks').value = '';
+                } else {
+                    console.warn("Missing data-id for reject button");
+                }
+            });
+        });
+        
+        // Confirm Return button: performs API call to reject/return the application
+        const confirmReturnBtn = document.getElementById('confirmReturnBtn');
+        if (confirmReturnBtn) {
+            confirmReturnBtn.addEventListener('click', async function() {
+                const kpiId = document.getElementById('returnKpiId').value;
+                const remarks = document.getElementById('returnRemarks').value.trim();
+                const kpiNameDisplay = document.getElementById('returnKpiName').value;
+                
+                if (!kpiId) {
+                    alert('Error: KPI identifier missing.');
+                    if (returnModal) returnModal.hide();
+                    return;
+                }
+                
+                if (!remarks) {
+                    alert('Please provide remarks/reason for returning the application. ADRM officer requires clarification.');
+                    return;
+                }
+                
+                // Disable button to prevent double submission
+                confirmReturnBtn.disabled = true;
+                confirmReturnBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                
+                try {
+                    const response = await fetch(`/return_kpi_to_adrm/${kpiId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ remarks: remarks })
+                    });
+                    
+                    let result;
+                    if (response.ok) {
+                        result = await response.json();
+                    } else {
+                        console.warn("Backend endpoint returned error");
+                        result = { success: false, message: "Server error occurred" };
+                    }
+                    
+                    if (result && result.success) {
+                        // Success: update the corresponding row in the table
+                        const targetRow = document.querySelector(`tr[data-id="${kpiId}"]`);
+                        if (targetRow) {
+                            // Update status cell
+                            const statusCell = targetRow.querySelector('.status-cell');
+                            if (statusCell) {
+                                statusCell.innerHTML = `<span class="badge-status status-RETURNED"><i class="fas fa-undo-alt"></i>RETURNED</span>`;
+                            }
+                            // Update action cell
+                            const actionCell = targetRow.querySelector('.action-buttons');
+                            if (actionCell) {
+                                actionCell.innerHTML = `
+                                    <button class="btn-reject" disabled style="background:#9ca3af;">
+                                        <i class="fa fa-undo"></i> Returned to ADRM
+                                    </button>
+                                `;
+                            }
+                            // Update data-status attribute
+                            targetRow.setAttribute('data-status', 'RETURNED');
+                        }
+                        alert(`✅ Application "${kpiNameDisplay || 'KPI'}" has been returned to ADRM Officer with remarks:\n"${remarks}"\n\nADRM Officer can now view the returned application and resubmit after corrections.`);
+                        if (returnModal) returnModal.hide();
+                        // Reload the page to refresh the list
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        alert('Return failed: ' + (result?.message || 'Please try again.'));
+                    }
+                } catch (err) {
+                    console.error('Return API error:', err);
+                    alert('Unable to connect to server. Please check your connection and try again.');
+                } finally {
+                    confirmReturnBtn.disabled = false;
+                    confirmReturnBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Confirm Return';
+                }
+            });
+        }
+        
+        // Reset modal state when hidden
+        if (returnModalElem) {
+            returnModalElem.addEventListener('hidden.bs.modal', function () {
+                document.getElementById('returnRemarks').value = '';
+                document.getElementById('returnKpiId').value = '';
+                document.getElementById('returnKpiName').value = '';
+                if (confirmReturnBtn) {
+                    confirmReturnBtn.disabled = false;
+                    confirmReturnBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Confirm Return';
+                }
+            });
+        }
+        
+        console.log('DRM Dashboard ready — Approve and Reject buttons integrated.');
     })();
+    
+    // Apply filter function - redirects to drm page with selected month/year
+    function applyFilter() {
+        const month = document.getElementById('filterMonth').value;
+        const year = document.getElementById('filterYear').value;
+        window.location.href = `/drm?month=${month}&year=${year}`;
+    }
 </script>
 </body>
 </html>

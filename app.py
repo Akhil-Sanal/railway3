@@ -14,6 +14,123 @@ app.config.from_object("config.Config")
 
 db = SQLAlchemy(app)
 
+def copy_to_approved_table(monthly_data_id):
+    """Copy a record from monthly_data to approved_data table - ONLY called when DRM approves"""
+    try:
+        # Fetch the record from monthly_data with all fields
+        result = db.session.execute(
+            db.text("""
+                SELECT 
+                    kpi_id,
+                    month,
+                    year,
+                    performance_month,
+                    cumulative_performance,
+                    entered_by,
+                    previous_year_value,
+                    cumulative_performance_of_prev_year,
+                    remarks
+                FROM monthly_data
+                WHERE id = :id
+            """),
+            {"id": monthly_data_id}
+        )
+        record = result.fetchone()
+        
+        if record:
+            # Check if already exists in approved_data
+            existing = db.session.execute(
+                db.text("""
+                    SELECT id FROM approved_data
+                    WHERE kpi_id = :kpi_id 
+                    AND entered_by = :entered_by 
+                    AND month = :month 
+                    AND year = :year
+                """),
+                {
+                    "kpi_id": record.kpi_id,
+                    "entered_by": record.entered_by,
+                    "month": record.month,
+                    "year": record.year
+                }
+            ).fetchone()
+            
+            if existing:
+                # Update existing record
+                db.session.execute(
+                    db.text("""
+                        UPDATE approved_data
+                        SET 
+                            performance_month = :performance_month,
+                            cumulative_performance = :cumulative_performance,
+                            previous_year_value = :previous_year_value,
+                            cumulative_performance_of_prev_year = :cumulative_performance_of_prev_year,
+                            remarks = :remarks,
+                            status = 'APPROVED',
+                            created_at = NOW()
+                        WHERE id = :id
+                    """),
+                    {
+                        "id": existing.id,
+                        "performance_month": record.performance_month,
+                        "cumulative_performance": record.cumulative_performance,
+                        "previous_year_value": record.previous_year_value,
+                        "cumulative_performance_of_prev_year": record.cumulative_performance_of_prev_year,
+                        "remarks": record.remarks
+                    }
+                )
+            else:
+                # Insert new record
+                db.session.execute(
+                    db.text("""
+                        INSERT INTO approved_data
+                        (
+                            kpi_id,
+                            month,
+                            year,
+                            performance_month,
+                            cumulative_performance,
+                            entered_by,
+                            previous_year_value,
+                            cumulative_performance_of_prev_year,
+                            remarks,
+                            status,
+                            created_at
+                        )
+                        VALUES
+                        (
+                            :kpi_id,
+                            :month,
+                            :year,
+                            :performance_month,
+                            :cumulative_performance,
+                            :entered_by,
+                            :previous_year_value,
+                            :cumulative_performance_of_prev_year,
+                            :remarks,
+                            'APPROVED',
+                            NOW()
+                        )
+                    """),
+                    {
+                        "kpi_id": record.kpi_id,
+                        "month": record.month,
+                        "year": record.year,
+                        "performance_month": record.performance_month,
+                        "cumulative_performance": record.cumulative_performance,
+                        "entered_by": record.entered_by,
+                        "previous_year_value": record.previous_year_value,
+                        "cumulative_performance_of_prev_year": record.cumulative_performance_of_prev_year,
+                        "remarks": record.remarks
+                    }
+                )
+            db.session.commit()
+            return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error copying to approved_data: {str(e)}")
+        return False
+
 @app.route("/")
 def home():
     return "Railway DPMS Running"
@@ -80,6 +197,14 @@ def drm():
     if session["role"] != "LEVEL5":
         return "Access Denied"
 
+    selected_month = request.args.get("month", "JUNE")
+    selected_year = request.args.get("year", "2026")
+    
+    try:
+        selected_year = int(selected_year)
+    except ValueError:
+        selected_year = 2026
+
     result = db.session.execute(
         db.text("""
             SELECT
@@ -93,15 +218,23 @@ def drm():
             JOIN kpis k
             ON md.kpi_id = k.id
             WHERE md.status = 'FORWARDED_TO_DRM'
+            AND md.month = :month
+            AND md.year = :year
             ORDER BY md.created_at DESC
-        """)
+        """),
+        {
+            "month": selected_month,
+            "year": selected_year
+        }
     )
 
     rows = result.fetchall()
 
     return render_template(
         "drm.html",
-        rows=rows
+        rows=rows,
+        selected_month=selected_month,
+        selected_year=selected_year
     )
 
 @app.route("/freeze/<int:id>")
@@ -586,6 +719,9 @@ def approve_bulk():
 
     try:
         for id_val in ids:
+            # REMOVED: copy_to_approved_table(id_val) - Only DRM should copy to approved_data
+            
+            # Update status to APPROVED
             db.session.execute(
                 db.text("""
                     UPDATE monthly_data
@@ -725,6 +861,8 @@ def adrm():
                 md.id,
                 md.performance_month,
                 md.cumulative_performance,
+                md.previous_year_value,
+                md.cumulative_performance_of_prev_year,
                 md.status,
                 md.remarks,
                 k.kpi_name,
@@ -754,6 +892,47 @@ def adrm():
         selected_year=selected_year
     )
 
+@app.route("/return_kpi_to_nodal/<int:id>", methods=["POST"])
+def return_kpi_to_nodal(id):
+    """ADRM returns KPI to Nodal Officer"""
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "Login required"}), 401
+    
+    if session["role"] != "LEVEL4":
+        return jsonify({"success": False, "message": "Access Denied"}), 403
+    
+    try:
+        data = request.get_json()
+        remarks = data.get("remarks", "")
+        
+        # Update the status to RETURNED (back to nodal officer)
+        db.session.execute(
+            db.text("""
+                UPDATE monthly_data
+                SET 
+                    status = 'RETURNED',
+                    remarks = :remarks
+                WHERE id = :id 
+                AND status = 'FORWARDED_TO_ADRM'
+            """),
+            {
+                "id": id,
+                "remarks": remarks
+            }
+        )
+        
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "message": "Application returned to Nodal Officer successfully"
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error returning KPI to nodal: {str(e)}")
+        return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
+
 @app.route("/forward_to_drm/<int:id>")
 def forward_to_drm(id):
     if "user_id" not in session:
@@ -763,6 +942,8 @@ def forward_to_drm(id):
         return "Access Denied"
     
     try:
+        # REMOVED: copy_to_approved_table(id) - Only DRM should copy to approved_data
+        
         db.session.execute(
             db.text("""
                 UPDATE monthly_data
@@ -787,6 +968,8 @@ def forward_to_adrm(id):
         return "Access Denied"
     
     try:
+        # REMOVED: copy_to_approved_table(id) - Only DRM should copy to approved_data
+        
         db.session.execute(
             db.text("""
                 UPDATE monthly_data
@@ -872,7 +1055,6 @@ def reject_to_employee(id):
     row = result.fetchone()
     
     # Create a kpi object compatible with return_form.html
-    # The return_form.html expects a 'kpi' variable with id, kpi_name, performance_month, cumulative_performance
     class KpiObject:
         def __init__(self, data):
             self.id = data.id
@@ -932,6 +1114,77 @@ def update_kpi(id):
         return f"Error: {str(e)}", 500
 
     return redirect("/admin/kpis")
+
+@app.route("/approve_kpi/<int:id>")
+def approve_kpi(id):
+    """DRM approves KPI - ONLY HERE data is copied to approved_data table"""
+    if "user_id" not in session:
+        return redirect("/login")
+    
+    if session["role"] != "LEVEL5":  # DRM role
+        return "Access Denied"
+    
+    try:
+        # Copy to approved_data ONLY when DRM approves
+        copy_to_approved_table(id)
+        
+        # Update status to FROZEN
+        db.session.execute(
+            db.text("""
+                UPDATE monthly_data
+                SET status='FROZEN'
+                WHERE id=:id AND status='FORWARDED_TO_DRM'
+            """),
+            {"id": id}
+        )
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return f"Error: {str(e)}", 500
+    
+    return redirect("/drm")
+
+@app.route("/return_kpi_to_adrm/<int:id>", methods=["POST"])
+def return_kpi_to_adrm(id):
+    """DRM returns KPI to ADRM Officer - NO copy to approved_data"""
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "Login required"}), 401
+    
+    if session["role"] != "LEVEL5":  # DRM role
+        return jsonify({"success": False, "message": "Access Denied"}), 403
+    
+    try:
+        data = request.get_json()
+        remarks = data.get("remarks", "")
+        
+        # Update the status to RETURNED (back to ADRM officer)
+        # NO copy to approved_data on reject
+        db.session.execute(
+            db.text("""
+                UPDATE monthly_data
+                SET 
+                    status = 'RETURNED',
+                    remarks = :remarks
+                WHERE id = :id 
+                AND status = 'FORWARDED_TO_DRM'
+            """),
+            {
+                "id": id,
+                "remarks": remarks
+            }
+        )
+        
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "message": "Application returned to ADRM Officer successfully"
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error returning KPI to ADRM: {str(e)}")
+        return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
 
 @app.route("/logout")
 def logout():
