@@ -1604,6 +1604,18 @@ def hod_bulk_download_template():
         report_month = first_result.month.upper()
         report_year = first_result.year
 
+        # Get department name
+        dept_result = db.session.execute(
+            db.text("""
+                SELECT dept_name 
+                FROM departments 
+                WHERE id = :dept_id
+            """),
+            {"dept_id": session["department_id"]}
+        ).fetchone()
+        
+        department_name = dept_result.dept_name if dept_result else "Unknown"
+
         placeholders = ",".join(
             f":id{i}" for i in range(len(ids))
         )
@@ -1691,10 +1703,10 @@ def hod_bulk_download_template():
             fontSize=10
         )
 
-        # Header with report month/year
+        # Header with report month/year and department
         story.append(Paragraph("INDIAN RAILWAYS", title_style))
         story.append(Paragraph("Palakkad Division - Southern Railway", subtitle_style))
-        story.append(Paragraph(f"HOD Bulk Approval Form - {report_month} {report_year}", subtitle_style))
+        story.append(Paragraph(f"HOD Bulk Approval Form - {department_name} - {report_month} {report_year}", subtitle_style))
         story.append(Spacer(1, 20))
 
         table_data = [[
@@ -1789,9 +1801,11 @@ def hod_bulk_download_template():
         pdf = buffer.getvalue()
         buffer.close()
 
-        # Generate filename with report month and year (NOT submission date)
-        # Format: HOD_Bulk_Approval_JUNE_2026.pdf
-        filename = f"HOD_Bulk_Approval_{report_month}_{report_year}.pdf"
+        # Generate filename with report month, year, and department
+        # Format: HOD_Bulk_Approval_DEPT_MONTH_YEAR.pdf
+        # Clean department name for filename (replace spaces with underscores)
+        clean_dept_name = department_name.replace(" ", "_")
+        filename = f"HOD_Bulk_Approval_{clean_dept_name}_{report_month}_{report_year}.pdf"
 
         return send_file(
             BytesIO(pdf),
@@ -1992,7 +2006,7 @@ def hod_check_document_status(monthly_data_id):
 
 @app.route("/hod/bulk_upload_signed_document", methods=["POST"])
 def hod_bulk_upload_signed_document():
-    """HOD uploads a single signed PDF for multiple KPIs with report month/year filename"""
+    """HOD uploads a single signed PDF for multiple KPIs with report month/year/department filename"""
     if "user_id" not in session:
         return jsonify({"success": False, "message": "Login required"}), 401
     
@@ -2038,6 +2052,18 @@ def hod_bulk_upload_signed_document():
         report_month = first_result.month.upper()
         report_year = first_result.year
         
+        # Get department name
+        dept_result = db.session.execute(
+            db.text("""
+                SELECT dept_name 
+                FROM departments 
+                WHERE id = :dept_id
+            """),
+            {"dept_id": session["department_id"]}
+        ).fetchone()
+        
+        department_name = dept_result.dept_name if dept_result else "Unknown"
+        
         # Verify all KPIs belong to HOD's department and are in SUBMITTED status
         placeholders = ','.join([':id' + str(i) for i in range(len(kpi_ids))])
         params = {}
@@ -2063,17 +2089,17 @@ def hod_bulk_upload_signed_document():
                 "message": "Some KPIs are not in SUBMITTED status or not in your department"
             }), 400
         
-        # Generate filename with report month/year
-        # Format: HOD_Bulk_Approval_{MONTH}_{YEAR}.pdf
-        original_filename = secure_filename(file.filename)
-        ext = original_filename.rsplit('.', 1)[1].lower() if '.' in original_filename else 'pdf'
-        unique_filename = f"HOD_Bulk_Approval_{report_month}_{report_year}.{ext}"
+        # Generate filename with report month, year, and department
+        # Format: HOD_Bulk_Approval_DEPT_MONTH_YEAR.pdf
+        clean_dept_name = department_name.replace(" ", "_")
+        ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'pdf'
+        unique_filename = f"HOD_Bulk_Approval_{clean_dept_name}_{report_month}_{report_year}.{ext}"
         
         # If file already exists, add a counter
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
         counter = 1
         while os.path.exists(file_path):
-            unique_filename = f"HOD_Bulk_Approval_{report_month}_{report_year}_{counter}.{ext}"
+            unique_filename = f"HOD_Bulk_Approval_{clean_dept_name}_{report_month}_{report_year}_{counter}.{ext}"
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
             counter += 1
         
