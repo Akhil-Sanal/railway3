@@ -20,6 +20,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from io import BytesIO
+import time
 
 app = Flask(__name__)
 app.secret_key = "railway_secret"
@@ -116,20 +117,43 @@ def shutdown_session(exception=None):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def safe_delete_file(file_path, max_retries=3):
+    """Safely delete a file with retries"""
+    if not os.path.exists(file_path):
+        return True
+    
+    for attempt in range(max_retries):
+        try:
+            os.remove(file_path)
+            return True
+        except (OSError, PermissionError) as e:
+            if attempt < max_retries - 1:
+                time.sleep(0.2)  # Wait 200ms before retry
+            else:
+                print(f"Warning: Could not delete file {file_path} after {max_retries} attempts: {str(e)}")
+                return False
+    return False
+
 def get_document_path(monthly_data_id):
     """Get the document path for a given KPI ID"""
     # First check if there's a mapping file for bulk upload
     mapping_file = os.path.join(app.config['UPLOAD_FOLDER'], f"bulk_mapping_{monthly_data_id}.txt")
     if os.path.exists(mapping_file):
-        with open(mapping_file, 'r') as f:
-            bulk_filename = f.read().strip()
-            if bulk_filename:
-                # Verify the file exists
-                if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], bulk_filename)):
-                    return bulk_filename
-                else:
-                    # File doesn't exist, remove mapping
-                    os.remove(mapping_file)
+        try:
+            with open(mapping_file, 'r') as f:
+                bulk_filename = f.read().strip()
+                if bulk_filename:
+                    # Verify the file exists
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], bulk_filename)
+                    if os.path.exists(file_path):
+                        return bulk_filename
+                    else:
+                        # File doesn't exist, remove mapping
+                        safe_delete_file(mapping_file)
+        except (OSError, PermissionError, IOError) as e:
+            # If can't read the file, treat as if it doesn't exist
+            print(f"Warning: Could not read mapping file {mapping_file}: {str(e)}")
+            return None
     
     # Look for files starting with the KPI ID (single upload)
     pattern = os.path.join(app.config['UPLOAD_FOLDER'], f"{monthly_data_id}_*.pdf")
@@ -395,8 +419,11 @@ def get_document_remarks(monthly_data_id):
     """Get remarks for a document"""
     remarks_file = os.path.join(app.config['UPLOAD_FOLDER'], f"{monthly_data_id}_remarks.txt")
     if os.path.exists(remarks_file):
-        with open(remarks_file, 'r') as f:
-            return f.read()
+        try:
+            with open(remarks_file, 'r') as f:
+                return f.read()
+        except (OSError, PermissionError):
+            return ""
     return ""
 
 def copy_to_approved_table(monthly_data_id):
@@ -1874,11 +1901,12 @@ def hod_upload_signed_document(monthly_data_id):
         if existing_doc:
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], existing_doc)
             if os.path.exists(file_path):
-                os.remove(file_path)
+                safe_delete_file(file_path)
+            
             # Delete mapping file if exists
             mapping_file = os.path.join(app.config['UPLOAD_FOLDER'], f"bulk_mapping_{monthly_data_id}.txt")
             if os.path.exists(mapping_file):
-                os.remove(mapping_file)
+                safe_delete_file(mapping_file)
         
         # Generate unique filename
         original_filename = secure_filename(file.filename)
@@ -1963,17 +1991,17 @@ def hod_delete_signed_document(monthly_data_id):
         if doc_path:
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], doc_path)
             if os.path.exists(file_path):
-                os.remove(file_path)
+                safe_delete_file(file_path)
         
         # Delete mapping file if exists
         mapping_file = os.path.join(app.config['UPLOAD_FOLDER'], f"bulk_mapping_{monthly_data_id}.txt")
         if os.path.exists(mapping_file):
-            os.remove(mapping_file)
+            safe_delete_file(mapping_file)
         
         # Delete remarks file
         remarks_file = os.path.join(app.config['UPLOAD_FOLDER'], f"{monthly_data_id}_remarks.txt")
         if os.path.exists(remarks_file):
-            os.remove(remarks_file)
+            safe_delete_file(remarks_file)
         
         return jsonify({
             "success": True,
@@ -2108,30 +2136,41 @@ def hod_bulk_upload_signed_document():
         
         # Associate the same document with all KPIs
         for kpi_id in kpi_ids:
-            # Delete existing document if any (including mapping)
-            existing_doc = get_document_path(kpi_id)
+            # First, get the existing document path (but don't hold the file open)
+            existing_doc = None
+            mapping_file = os.path.join(app.config['UPLOAD_FOLDER'], f"bulk_mapping_{kpi_id}.txt")
+            
+            # Check if there's a mapping file
+            if os.path.exists(mapping_file):
+                try:
+                    with open(mapping_file, 'r') as f:
+                        existing_doc = f.read().strip()
+                except (OSError, PermissionError):
+                    pass
+            
+            # If no mapping file, check for single upload files
+            if not existing_doc:
+                pattern = os.path.join(app.config['UPLOAD_FOLDER'], f"{kpi_id}_*.pdf")
+                files = glob.glob(pattern)
+                if files:
+                    existing_doc = os.path.basename(files[0])
+            
+            # Delete existing document if any
             if existing_doc:
                 existing_path = os.path.join(app.config['UPLOAD_FOLDER'], existing_doc)
                 if os.path.exists(existing_path) and existing_doc != unique_filename:
-                    try:
-                        os.remove(existing_path)
-                    except:
-                        pass
-                # Delete existing mapping file
-                existing_mapping = os.path.join(app.config['UPLOAD_FOLDER'], f"bulk_mapping_{kpi_id}.txt")
-                if os.path.exists(existing_mapping):
-                    try:
-                        os.remove(existing_mapping)
-                    except:
-                        pass
+                    safe_delete_file(existing_path)
+            
+            # Delete mapping file if exists
+            if os.path.exists(mapping_file):
+                safe_delete_file(mapping_file)
             
             # Store remarks for each KPI
             remarks_file = os.path.join(app.config['UPLOAD_FOLDER'], f"{kpi_id}_remarks.txt")
             with open(remarks_file, 'w') as f:
                 f.write(f"Bulk upload: {remarks}" if remarks else "Bulk upload")
             
-            # Create a mapping file to link the KPI to the bulk file
-            mapping_file = os.path.join(app.config['UPLOAD_FOLDER'], f"bulk_mapping_{kpi_id}.txt")
+            # Create a new mapping file to link the KPI to the bulk file
             with open(mapping_file, 'w') as f:
                 f.write(unique_filename)
         
@@ -2361,6 +2400,159 @@ def nodal():
         selected_year=selected_year,
         financial_year_display=get_financial_year_display(financial_year)
     )
+
+@app.route("/nodal/submission_status")
+def nodal_submission_status():
+    """Get submission status for all departments for the selected month/year"""
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "Login required"}), 401
+    
+    if session["role"] != "LEVEL3":
+        return jsonify({"success": False, "message": "Access Denied"}), 403
+    
+    selected_month = request.args.get("month", "JUNE")
+    selected_year = request.args.get("year", "2026")
+    
+    try:
+        selected_year = int(selected_year)
+    except ValueError:
+        selected_year = 2026
+    
+    # Get all departments
+    dept_result = db.session.execute(
+        db.text("""
+            SELECT id, dept_name 
+            FROM departments 
+            ORDER BY dept_name
+        """)
+    )
+    departments = dept_result.fetchall()
+    
+    # For each department, check submission status
+    status_data = []
+    
+    for dept in departments:
+        # Get all KPIs for this department
+        kpi_result = db.session.execute(
+            db.text("""
+                SELECT id, kpi_name 
+                FROM kpis 
+                WHERE department_id = :dept_id
+            """),
+            {"dept_id": dept.id}
+        )
+        kpis = kpi_result.fetchall()
+        
+        total_kpis = len(kpis)
+        
+        if total_kpis == 0:
+            # Skip departments with no KPIs
+            continue
+        
+        # Check which KPIs have been submitted for this month/year
+        submitted_result = db.session.execute(
+            db.text("""
+                SELECT COUNT(DISTINCT md.kpi_id) as count
+                FROM monthly_data md
+                WHERE md.kpi_id IN (
+                    SELECT id FROM kpis WHERE department_id = :dept_id
+                )
+                AND UPPER(md.month) = UPPER(:month)
+                AND md.year = :year
+                AND md.status IN ('SUBMITTED', 'APPROVED', 'FORWARDED_TO_ADRM', 'FORWARDED_TO_DRM', 'FROZEN')
+            """),
+            {
+                "dept_id": dept.id,
+                "month": selected_month,
+                "year": selected_year
+            }
+        )
+        submitted_count = submitted_result.fetchone().count or 0
+        
+        # Check which KPIs have been approved by HOD (APPROVED or higher)
+        approved_result = db.session.execute(
+            db.text("""
+                SELECT COUNT(DISTINCT md.kpi_id) as count
+                FROM monthly_data md
+                WHERE md.kpi_id IN (
+                    SELECT id FROM kpis WHERE department_id = :dept_id
+                )
+                AND UPPER(md.month) = UPPER(:month)
+                AND md.year = :year
+                AND md.status IN ('APPROVED', 'FORWARDED_TO_ADRM', 'FORWARDED_TO_DRM', 'FROZEN')
+            """),
+            {
+                "dept_id": dept.id,
+                "month": selected_month,
+                "year": selected_year
+            }
+        )
+        approved_count = approved_result.fetchone().count or 0
+        
+        # Get list of unsubmitted KPIs
+        unsubmitted_result = db.session.execute(
+            db.text("""
+                SELECT k.id, k.kpi_name
+                FROM kpis k
+                WHERE k.department_id = :dept_id
+                AND k.id NOT IN (
+                    SELECT DISTINCT md.kpi_id
+                    FROM monthly_data md
+                    WHERE md.kpi_id = k.id
+                    AND UPPER(md.month) = UPPER(:month)
+                    AND md.year = :year
+                    AND md.status IN ('SUBMITTED', 'APPROVED', 'FORWARDED_TO_ADRM', 'FORWARDED_TO_DRM', 'FROZEN')
+                )
+            """),
+            {
+                "dept_id": dept.id,
+                "month": selected_month,
+                "year": selected_year
+            }
+        )
+        unsubmitted_kpis = unsubmitted_result.fetchall()
+        
+        # Determine status
+        if total_kpis == submitted_count:
+            status = "COMPLETED"
+            status_class = "success"
+            status_icon = "fa-check-circle"
+            status_text = "✅ All Submitted"
+        elif submitted_count > 0:
+            status = "PARTIAL"
+            status_class = "warning"
+            status_icon = "fa-clock"
+            status_text = f"⏳ {submitted_count}/{total_kpis} Submitted"
+        else:
+            status = "PENDING"
+            status_class = "danger"
+            status_icon = "fa-times-circle"
+            status_text = "❌ Not Submitted"
+        
+        status_data.append({
+            "department_id": dept.id,
+            "department_name": dept.dept_name,
+            "total_kpis": total_kpis,
+            "submitted_count": submitted_count,
+            "approved_count": approved_count,
+            "unsubmitted_kpis": [{"id": k.id, "name": k.kpi_name} for k in unsubmitted_kpis],
+            "status": status,
+            "status_class": status_class,
+            "status_icon": status_icon,
+            "status_text": status_text,
+            "submission_percentage": round((submitted_count / total_kpis) * 100, 1) if total_kpis > 0 else 0
+        })
+    
+    # Sort: PENDING first, then PARTIAL, then COMPLETED
+    status_order = {"PENDING": 0, "PARTIAL": 1, "COMPLETED": 2}
+    status_data.sort(key=lambda x: status_order.get(x["status"], 3))
+    
+    return jsonify({
+        "success": True,
+        "data": status_data,
+        "selected_month": selected_month,
+        "selected_year": selected_year
+    })
 
 @app.route("/adrm")
 def adrm():

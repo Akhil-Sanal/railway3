@@ -154,6 +154,37 @@
  }
  .page-heading p { font-size: .78rem; color: #5c6b7a; margin: .2rem 0 0; }
  
+ /* ── SUMMARY STATS CARDS ── */
+ .stat-card {
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+ }
+ .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+ }
+ .stat-card .stat-icon {
+    font-size: 1.8rem;
+    opacity: 0.4;
+ }
+ .stat-card .stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+ }
+ .stat-card .stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.75;
+    margin-bottom: 0.25rem;
+ }
+ .stat-card .stat-sub {
+    font-size: 0.7rem;
+    opacity: 0.7;
+ }
+ 
  /* ── TABLE CARD ── */
  .table-card {
  background: #fff;
@@ -210,7 +241,7 @@
  accent-color: var(--rly-blue);
  }
  
- /* Performance Indicator Styles - SWAPPED */
+ /* Performance Indicator Styles */
  .perf-value-with-indicator {
     display: inline-flex;
     align-items: center;
@@ -244,13 +275,17 @@
     display: block;
  }
  
- /* Row highlighting - SWAPPED: Red for Needs Improvement, Green for On Track */
+ /* Row highlighting */
  tr.has-red-indicator {
     border-left: 3px solid #dc3545;
     background-color: #fff8f8;
  }
  tr.has-green-indicator {
     border-left: 3px solid #198754;
+ }
+ tr.has-warning-indicator {
+    border-left: 3px solid #ffc107;
+    background-color: #fffbf0;
  }
  
  /* ── STATUS BADGES ── */
@@ -267,6 +302,9 @@
  .badge-forwarded { background: #cfe2ff; color: #0a3e7a; border: 1px solid #0d6efd; }
  .badge-frozen { background: #e2e3e5; color: #41464b; border: 1px solid #6c757d; }
  .badge-default { background: #e8eef8; color: var(--rly-blue); border: 1px solid var(--border); }
+ .badge-success { background: #d1e7dd; color: #0a5c36; border: 1px solid #198754; }
+ .badge-warning { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+ .badge-danger { background: #f8d7da; color: #842029; border: 1px solid #dc3545; }
  
  /* ── DOCUMENT STYLES ── */
  .doc-uploaded {
@@ -500,29 +538,23 @@
 </head>
 <body>
  
-<!-- ══ NAVBAR with LOGOUT BUTTON and Railway Logo (Nodal Officer Dashboard) ═════════════════ -->
+<!-- ══ NAVBAR ══════════════════════════════════════════════ -->
 <nav class="top-navbar">
- <!-- Railway Logo Image -->
  <div class="emblem">
   <img src="{{ url_for('static', filename='images/images.png') }}" 
        alt="Southern Railway Emblem" 
        class="logo-img"
        onerror="this.style.display='none'; this.parentElement.innerHTML='<svg class=\'ir-logo\' viewBox=\'0 0 44 44\' fill=\'none\' xmlns=\'http://www.w3.org/2000/svg\'><circle cx=\'22\' cy=\'22\' r=\'20\' stroke=\'#d4a017\' stroke-width=\'2.5\' fill=\'none\'/><g stroke=\'#d4a017\' stroke-width=\'1.6\'><line x1=\'22\' y1=\'4\' x2=\'22\' y2=\'40\'/><line x1=\'4\' y1=\'22\' x2=\'40\' y2=\'22\'/><line x1=\'8.7\' y1=\'8.7\' x2=\'35.3\' y2=\'35.3\'/><line x1=\'35.3\' y1=\'8.7\' x2=\'8.7\' y2=\'35.3\'/></g><circle cx=\'22\' cy=\'22\' r=\'5\' fill=\'#d4a017\'/><circle cx=\'22\' cy=\'22\' r=\'2\' fill=\'#003366\'/></svg>'">
  </div>
- 
  <div>
   <div class="brand-title">Indian Railways</div>
   <div class="brand-sub">भारतीय रेल</div>
  </div>
- 
  <div class="nav-divider"></div>
- 
  <div>
   <div class="app-name">Division Performance Monitoring System</div>
   <div class="app-sub">Palakkad Division &nbsp;|&nbsp; Southern Railway</div>
  </div>
- 
- <!-- Right side controls: officer info + logout button -->
  <div class="nav-controls">
   <div class="user-badge">
    <i class="fas fa-user-check"></i>
@@ -553,6 +585,62 @@
    <h4><i class="fas fa-user-tie me-2" style="color:var(--rly-gold)"></i>Nodal Officer Dashboard</h4>
    <p>Review approved KPI submissions and forward to ADRM</p>
   </div>
+ </div>
+ 
+ <!-- ─── SUMMARY STATS CARDS ─── -->
+ <div class="row g-3 mb-4" id="summaryStats">
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm stat-card" style="background: linear-gradient(135deg, #003366, #0055a5); color: white;">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Total KPIs</div>
+                        <div class="stat-number" id="totalKpisCount">-</div>
+                    </div>
+                    <i class="fas fa-chart-bar stat-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm stat-card" style="background: linear-gradient(135deg, #198754, #157347); color: white;">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Submitted</div>
+                        <div class="stat-number" id="submittedCount">-</div>
+                    </div>
+                    <i class="fas fa-check-circle stat-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm stat-card" style="background: linear-gradient(135deg, #ffc107, #e0a800); color: #1a2a3a;">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Pending</div>
+                        <div class="stat-number" id="pendingCount">-</div>
+                    </div>
+                    <i class="fas fa-clock stat-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm stat-card" style="background: linear-gradient(135deg, #dc3545, #b02a37); color: white;">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Not Started</div>
+                        <div class="stat-number" id="notStartedCount">-</div>
+                    </div>
+                    <i class="fas fa-times-circle stat-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
  </div>
  
  <!-- Month/Year Filter -->
@@ -596,6 +684,27 @@
     </div>
    </div>
   </form>
+ </div>
+ 
+ <!-- ─── SUBMISSION STATUS CARD ─── -->
+ <div class="table-card mb-4">
+    <div class="table-card-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <i class="fas fa-clipboard-check" style="color:var(--rly-gold);"></i>
+            <h6 class="mb-0">Department Submission Status – {{ selected_month }} {{ selected_year }}</h6>
+        </div>
+        <button class="btn btn-sm btn-outline-light" id="refreshStatusBtn" title="Refresh Status">
+            <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+    </div>
+    <div class="table-responsive" id="submissionStatusContainer">
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Loading submission status...</p>
+        </div>
+    </div>
  </div>
  
  <!-- Table card -->
@@ -875,7 +984,6 @@
        const toastTitle = document.getElementById('toastTitle');
        const toastIcon = document.getElementById('toastIcon');
        
-       // Reset classes
        toastEl.className = 'toast';
        if (type === 'success') {
            toastEl.classList.add('toast-success');
@@ -903,7 +1011,232 @@
        toast.show();
    }
    
-   // Function to check document status for a KPI
+   // ─── SUBMISSION STATUS LOADING ───
+   
+   function loadSubmissionStatus() {
+       const container = document.getElementById('submissionStatusContainer');
+       const monthSelect = document.querySelector('select[name="month"]');
+       const yearSelect = document.querySelector('select[name="year"]');
+       const selectedMonth = monthSelect ? monthSelect.value : 'JUNE';
+       const selectedYear = yearSelect ? yearSelect.value : '2026';
+       
+       // Show loading
+       container.innerHTML = `
+           <div class="text-center py-4">
+               <div class="spinner-border text-primary" role="status">
+                   <span class="visually-hidden">Loading...</span>
+               </div>
+               <p class="mt-2 text-muted">Loading submission status...</p>
+           </div>
+       `;
+       
+       fetch(`/nodal/submission_status?month=${selectedMonth}&year=${selectedYear}`)
+           .then(response => response.json())
+           .then(data => {
+               if (!data.success) {
+                   container.innerHTML = `
+                       <div class="alert alert-danger m-3">
+                           <i class="fas fa-exclamation-circle me-2"></i>
+                           Failed to load submission status: ${data.message || 'Unknown error'}
+                       </div>
+                   `;
+                   return;
+               }
+               
+               // Update summary stats
+               const totalKpis = data.data.reduce((sum, d) => sum + d.total_kpis, 0);
+               const submittedKpis = data.data.reduce((sum, d) => sum + d.submitted_count, 0);
+               const pendingKpis = data.data.reduce((sum, d) => sum + (d.total_kpis - d.submitted_count), 0);
+               const notStartedKpis = data.data.filter(d => d.submitted_count === 0).reduce((sum, d) => sum + d.total_kpis, 0);
+               
+               document.getElementById('totalKpisCount').textContent = totalKpis;
+               document.getElementById('submittedCount').textContent = submittedKpis;
+               document.getElementById('pendingCount').textContent = pendingKpis;
+               document.getElementById('notStartedCount').textContent = notStartedKpis;
+               
+               if (data.data.length === 0) {
+                   container.innerHTML = `
+                       <div class="text-center py-4">
+                           <i class="fas fa-inbox fa-2x mb-2 d-block" style="color:#cdd8e3;"></i>
+                           <p class="text-muted">No departments found</p>
+                       </div>
+                   `;
+                   return;
+               }
+               
+               let html = `
+                   <table class="kpi-table">
+                       <thead>
+                           <tr>
+                               <th>#</th>
+                               <th>Department</th>
+                               <th>KPIs</th>
+                               <th>Submitted</th>
+                               <th>Approved by HOD</th>
+                               <th>Progress</th>
+                               <th>Status</th>
+                               <th>Action</th>
+                           </tr>
+                       </thead>
+                       <tbody>
+               `;
+               
+               data.data.forEach((dept, index) => {
+                   const progressColor = dept.submission_percentage >= 100 ? 'success' : 
+                                        dept.submission_percentage >= 50 ? 'warning' : 'danger';
+                   
+                   html += `
+                       <tr class="${dept.status === 'PENDING' ? 'has-red-indicator' : dept.status === 'PARTIAL' ? 'has-warning-indicator' : ''}">
+                           <td class="sn-cell">${index + 1}</td>
+                           <td>
+                               <strong>${dept.department_name}</strong>
+                           </td>
+                           <td>${dept.total_kpis}</td>
+                           <td>
+                               <span class="fw-bold">${dept.submitted_count}</span>
+                               <span class="text-muted">/ ${dept.total_kpis}</span>
+                           </td>
+                           <td>
+                               <span class="fw-bold">${dept.approved_count}</span>
+                               <span class="text-muted">/ ${dept.total_kpis}</span>
+                           </td>
+                           <td>
+                               <div class="progress" style="height: 8px; width: 120px;">
+                                   <div class="progress-bar bg-${progressColor}" 
+                                        role="progressbar" 
+                                        style="width: ${dept.submission_percentage}%;" 
+                                        aria-valuenow="${dept.submission_percentage}" 
+                                        aria-valuemin="0" 
+                                        aria-valuemax="100">
+                                   </div>
+                               </div>
+                               <small class="text-muted">${dept.submission_percentage}%</small>
+                           </td>
+                           <td>
+                               <span class="badge-status badge-${dept.status_class}">
+                                   <i class="fas ${dept.status_icon}"></i>
+                                   ${dept.status_text}
+                               </span>
+                           </td>
+                           <td>
+                               ${dept.unsubmitted_kpis.length > 0 ? `
+                                   <button class="btn btn-sm btn-outline-danger view-missing-btn" 
+                                           data-dept="${dept.department_name}" 
+                                           data-kpis='${JSON.stringify(dept.unsubmitted_kpis)}'
+                                           title="View missing KPIs">
+                                       <i class="fas fa-list"></i> Missing (${dept.unsubmitted_kpis.length})
+                                   </button>
+                               ` : `
+                                   <span class="text-success"><i class="fas fa-check-circle"></i> All done</span>
+                               `}
+                           </td>
+                       </tr>
+                   `;
+               });
+               
+               html += `
+                       </tbody>
+                       <tfoot>
+                           <tr>
+                               <td colspan="8">
+                                   <div class="d-flex align-items-center gap-4 flex-wrap">
+                                       <div>
+                                           <i class="fas fa-info-circle me-1"></i>
+                                           <strong>Status Legend:</strong>
+                                       </div>
+                                       <div>
+                                           <span class="badge-status badge-success"><i class="fas fa-check-circle"></i> COMPLETED</span>
+                                           <span class="text-muted ms-1">All KPIs submitted</span>
+                                       </div>
+                                       <div>
+                                           <span class="badge-status badge-warning"><i class="fas fa-clock"></i> PARTIAL</span>
+                                           <span class="text-muted ms-1">Some KPIs submitted</span>
+                                       </div>
+                                       <div>
+                                           <span class="badge-status badge-danger"><i class="fas fa-times-circle"></i> PENDING</span>
+                                           <span class="text-muted ms-1">No KPIs submitted</span>
+                                       </div>
+                                   </div>
+                               </td>
+                           </tr>
+                       </tfoot>
+                   </table>
+               `;
+               
+               container.innerHTML = html;
+               
+               // Add event listeners for "View Missing" buttons
+               document.querySelectorAll('.view-missing-btn').forEach(btn => {
+                   btn.addEventListener('click', function() {
+                       const deptName = this.dataset.dept;
+                       const kpis = JSON.parse(this.dataset.kpis);
+                       showMissingKPIs(deptName, kpis);
+                   });
+               });
+               
+           })
+           .catch(error => {
+               console.error('Error loading submission status:', error);
+               container.innerHTML = `
+                   <div class="alert alert-danger m-3">
+                       <i class="fas fa-exclamation-circle me-2"></i>
+                       Error loading submission status. Please try again.
+                   </div>
+               `;
+           });
+   }
+   
+   // Function to show missing KPIs in a modal
+   function showMissingKPIs(deptName, kpis) {
+       const selectedMonth = document.querySelector('select[name="month"]')?.value || 'JUNE';
+       const selectedYear = document.querySelector('select[name="year"]')?.value || '2026';
+       
+       const modalHtml = `
+           <div class="modal fade" id="missingKPIModal" tabindex="-1" aria-hidden="true">
+               <div class="modal-dialog">
+                   <div class="modal-content">
+                       <div class="modal-header" style="background: var(--rly-blue); color: white;">
+                           <h5 class="modal-title">
+                               <i class="fas fa-list me-2"></i>
+                               Missing KPIs - ${deptName}
+                           </h5>
+                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
+                       </div>
+                       <div class="modal-body">
+                           <p class="text-muted">The following KPIs have not been submitted for ${selectedMonth} ${selectedYear}:</p>
+                           <ul class="list-group">
+                               ${kpis.map(kpi => `
+                                   <li class="list-group-item d-flex justify-content-between align-items-center">
+                                       <span><i class="fas fa-file-alt text-danger me-2"></i>${kpi.name}</span>
+                                       <span class="badge bg-danger">Not Submitted</span>
+                                   </li>
+                               `).join('')}
+                           </ul>
+                       </div>
+                       <div class="modal-footer">
+                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                       </div>
+                   </div>
+               </div>
+           </div>
+       `;
+       
+       const existingModal = document.getElementById('missingKPIModal');
+       if (existingModal) {
+           existingModal.remove();
+       }
+       
+       document.body.insertAdjacentHTML('beforeend', modalHtml);
+       
+       const modal = new bootstrap.Modal(document.getElementById('missingKPIModal'));
+       modal.show();
+       
+       document.getElementById('missingKPIModal').addEventListener('hidden.bs.modal', function() {
+           this.remove();
+       });
+   }
+   
+   // ─── CHECK DOCUMENT STATUS ───
    function checkDocumentStatus(kpiId) {
        const statusDiv = document.getElementById(`docStatus-${kpiId}`);
        if (!statusDiv) return;
@@ -951,12 +1284,11 @@
            });
    }
    
-   // Function to view document in modal
+   // ─── VIEW DOCUMENT ───
    window.viewDocument = function(kpiId) {
        const modal = new bootstrap.Modal(document.getElementById('docViewModal'));
        const contentDiv = document.getElementById('docViewContent');
        
-       // Show loading
        contentDiv.innerHTML = `
            <div class="text-center py-5">
                <div class="spinner-border text-primary" role="status">
@@ -966,10 +1298,8 @@
            </div>
        `;
        
-       // Set download link
        document.getElementById('docDownloadLink').href = `/hod/download_signed_document/${kpiId}`;
        
-       // Try to embed the PDF
        fetch(`/hod/check_document_status/${kpiId}`)
            .then(response => response.json())
            .then(data => {
@@ -1009,28 +1339,20 @@
        modal.show();
    };
    
-   // ─── BULK SELECT / FORWARD FUNCTIONALITY ───
-   
-   // Get all row checkboxes
+   // ─── BULK SELECT / FORWARD ───
    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
    const selectAllHeader = document.getElementById('selectAllHeader');
    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
    const forwardSelectedBtn = document.getElementById('forwardSelectedBtn');
    const selectedCountSpan = document.getElementById('selectedCount');
-   
-   // Get all rows with APPROVED status (forwardable)
    const forwardableRows = document.querySelectorAll('tbody tr[data-status="APPROVED"]');
    
-   // Function to update selected count and button state
    function updateSelectionState() {
        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
        const count = checkedBoxes.length;
        selectedCountSpan.textContent = count;
-       
-       // Enable/disable forward button
        forwardSelectedBtn.disabled = count === 0;
        
-       // Update "Select All" checkbox states
        const visibleCheckboxes = document.querySelectorAll('.row-checkbox');
        const visibleChecked = document.querySelectorAll('.row-checkbox:checked');
        const allChecked = visibleCheckboxes.length > 0 && visibleCheckboxes.length === visibleChecked.length;
@@ -1039,12 +1361,10 @@
        selectAllCheckbox.checked = allChecked;
    }
    
-   // Individual checkbox change
    rowCheckboxes.forEach(cb => {
        cb.addEventListener('change', updateSelectionState);
    });
    
-   // Select All - Header checkbox
    selectAllHeader.addEventListener('change', function() {
        const isChecked = this.checked;
        rowCheckboxes.forEach(cb => {
@@ -1053,7 +1373,6 @@
        updateSelectionState();
    });
    
-   // Select All - Bulk actions checkbox
    selectAllCheckbox.addEventListener('change', function() {
        const isChecked = this.checked;
        rowCheckboxes.forEach(cb => {
@@ -1062,10 +1381,9 @@
        updateSelectionState();
    });
    
-   // Initialize selection state
    updateSelectionState();
    
-   // ─── BULK FORWARD TO ADRM ───
+   // ─── BULK FORWARD ───
    forwardSelectedBtn.addEventListener('click', function() {
        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
        const selectedIds = [];
@@ -1081,7 +1399,6 @@
            return;
        }
        
-       // Check if any selected KPI has red indicator (Needs Improvement)
        let hasRedIndicator = false;
        let redKpiNames = [];
        checkedBoxes.forEach(cb => {
@@ -1104,11 +1421,9 @@
            return;
        }
        
-       // Disable button and show loading state
        forwardSelectedBtn.disabled = true;
        forwardSelectedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Forwarding...';
        
-       // Send bulk forward request
        fetch('/nodal/bulk_forward', {
            method: 'POST',
            headers: {
@@ -1121,8 +1436,6 @@
        .then(data => {
            if (data.success) {
                showToast(data.message || `${selectedIds.length} KPI(s) forwarded successfully!`, 'success', 'Forwarded');
-               
-               // Reload page after short delay to show updated status
                setTimeout(() => {
                    window.location.reload();
                }, 1500);
@@ -1140,21 +1453,17 @@
        });
    });
    
-   // Helper to get CSRF token
    function getCsrfToken() {
-       // Try to get from meta tag
        const metaTag = document.querySelector('meta[name="csrf-token"]');
        if (metaTag) {
            return metaTag.getAttribute('content');
        }
-       // Fallback: generate a random token (server should validate)
        return 'dummy-token';
    }
    
    // ─── SINGLE FORWARD CONFIRMATION ───
    const forwardLinks = document.querySelectorAll('.btn-forward');
    forwardLinks.forEach(link => {
-     // Only add confirmation to actual links (not disabled buttons)
      if (link.href && link.classList.contains('btn-forward')) {
        link.addEventListener('click', function(e) {
          const row = this.closest('tr');
@@ -1187,7 +1496,33 @@
      }
    });
    
-   // ─── CHECK DOCUMENT STATUS FOR ALL ROWS ───
+   // ─── INIT ───
+   // Load submission status
+   loadSubmissionStatus();
+   
+   // Refresh button
+   document.getElementById('refreshStatusBtn')?.addEventListener('click', function() {
+       loadSubmissionStatus();
+       showToast('Refreshing submission status...', 'info', 'Refreshing');
+   });
+   
+   // Re-load when month/year filter changes
+   const monthSelect = document.querySelector('select[name="month"]');
+   const yearSelect = document.querySelector('select[name="year"]');
+   
+   if (monthSelect) {
+       monthSelect.addEventListener('change', function() {
+           setTimeout(loadSubmissionStatus, 500);
+       });
+   }
+   
+   if (yearSelect) {
+       yearSelect.addEventListener('change', function() {
+           setTimeout(loadSubmissionStatus, 500);
+       });
+   }
+   
+   // Check document status for all rows
    document.querySelectorAll('tbody tr[data-id]').forEach(row => {
        const kpiId = row.getAttribute('data-id');
        if (kpiId) {
@@ -1195,7 +1530,7 @@
        }
    });
    
-   // ─── ANIMATE INDICATORS ───
+   // Animate indicators
    const indicators = document.querySelectorAll('.performance-indicator');
    console.log(`Found ${indicators.length} performance indicators on Nodal page (SWAPPED: Red=Needs Improvement, Green=On Track)`);
    indicators.forEach(indicator => {
